@@ -957,6 +957,7 @@
   </div>
 
 <script>
+
   var EMAILJS_PUBLIC_KEY  = "eo_6wWWDxsaqQ5zWh";
   var EMAILJS_SERVICE_ID  = "service_notblih";
   var EMAILJS_TEMPLATE_ID = "template_rqweftd";
@@ -969,12 +970,12 @@
   }
 
   function getRadio(name) {
-    var el = document.querySelector("input[name=" + name + "]:checked");
+    var el = document.querySelector('input[name="' + name + '"]:checked');
     return el ? el.value : "";
   }
 
   function getChecks(name) {
-    var els = document.querySelectorAll("input[name=" + name + "]:checked");
+    var els = document.querySelectorAll('input[name="' + name + '"]:checked');
     if (!els.length) return "Хоосон";
     var r = [];
     for (var i = 0; i < els.length; i++) r.push(els[i].value);
@@ -986,92 +987,65 @@
     return el ? el.selectedIndex : 0;
   }
 
+  function selText(id) {
+    var el = document.getElementById(id);
+    return (el && el.selectedIndex > 0) ? el.options[el.selectedIndex].text : "Хоосон";
+  }
+
   function vText(id) {
     var el = document.getElementById(id);
-    return el ? el.value.trim() : "";
+    return el ? (el.value.trim() || "Хоосон") : "Хоосон";
   }
 
   function buildMsg() {
     var anon = document.getElementById("anonToggle").checked;
-    var s = "=== ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ ===
-
-";
-    s += "[1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ]
-";
-    s += "Нэрээ нууцалсан : " + (anon ? "Тийм" : "Үгүй") + "
-";
+    var lines = [];
+    lines.push("=== ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ ===");
+    lines.push("");
+    lines.push("[1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ]");
+    lines.push("Нэрээ нууцалсан : " + (anon ? "Тийм" : "Үгүй"));
     if (!anon) {
-      s += "Нэр, овог       : " + (vText("f_ner") || "Хоосон") + "
-";
-      s += "Хүйс            : " + (getRadio("gender") || "Хоосон") + "
-";
+      lines.push("Нэр, овог       : " + vText("f_ner"));
+      lines.push("Хүйс            : " + (getRadio("gender") || "Хоосон"));
     }
-    var angi = document.getElementById("f_angi");
-    var buleg = document.getElementById("f_buleg");
-    var gazar = document.getElementById("f_gazar");
-    s += "Анги            : " + (angi && angi.selectedIndex > 0 ? angi.options[angi.selectedIndex].text : "Хоосон") + "
-";
-    s += "Бүлэг           : " + (buleg && buleg.selectedIndex > 0 ? buleg.options[buleg.selectedIndex].text : "Хоосон") + "
-";
-    s += "Мэдэгдэгч       : " + (getRadio("reporter") || "Хоосон") + "
-";
-    s += "
-[2. ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ]
-";
-    s += "Төрлүүд         : " + getChecks("type") + "
-";
-    s += "Давтамж         : " + (getRadio("frequency") || "Хоосон") + "
-";
-    s += "
-[3. БОЛСОН НӨХЦӨЛ]
-";
-    s += "Огноо           : " + (vText("f_ognoo") || "Хоосон") + "
-";
-    s += "Газар           : " + (gazar && gazar.selectedIndex > 0 ? gazar.options[gazar.selectedIndex].text : "Хоосон") + "
-";
-    s += "Гэрч байсан     : " + (getRadio("witness") || "Хоосон") + "
-";
-    s += "
-Дэлгэрэнгүй тайлбар:
-" + (vText("f_tailbar") || "Хоосон") + "
-";
-    s += "
-[4. ДЭЭРЭЛХЭГЧИЙН МЭДЭЭЛЭЛ]
-";
-    s += "Нэр             : " + (vText("f_bully_ner") || "Хоосон") + "
-";
-    s += "Анги, бүлэг     : " + (vText("f_bully_angi") || "Хоосон") + "
-";
-    s += "Хүйс            : " + (getRadio("bullyGender") || "Хоосон") + "
-";
-    s += "
-Нэмэлт тодорхойлолт:
-" + (vText("f_bully_todorh") || "Хоосон") + "
-";
-    s += "
-[5. ЯАРАЛТАЙ ТУСЛАМЖ]
-";
-    s += "Яаралтай эсэх   : " + (getRadio("urgent") || "Хоосон") + "
-";
-    s += "Мэдрэмж         : " + getChecks("feeling") + "
-";
-    s += "
-[6. НЭМЭЛТ МЭДЭЭЛЭЛ]
-";
-    s += "Өмнө мэдэгдсэн  : " + (getRadio("prevReport") || "Хоосон") + "
-";
-    s += "Нотлох баримт   : " + getChecks("evidence") + "
-";
-    s += "Хэрэгтэй тусламж: " + getChecks("help") + "
-";
-    s += "
-Нэмэлт тайлбар:
-" + (vText("f_nemeltel") || "Хоосон") + "
-";
-    s += "
-================================
-";
-    return s;
+    lines.push("Анги            : " + selText("f_angi"));
+    lines.push("Бүлэг           : " + selText("f_buleg"));
+    lines.push("Мэдэгдэгч       : " + (getRadio("reporter") || "Хоосон"));
+    lines.push("");
+    lines.push("[2. ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ]");
+    lines.push("Төрлүүд         : " + getChecks("type"));
+    lines.push("Давтамж         : " + (getRadio("frequency") || "Хоосон"));
+    lines.push("");
+    lines.push("[3. БОЛСОН НӨХЦӨЛ]");
+    lines.push("Огноо           : " + vText("f_ognoo"));
+    lines.push("Газар           : " + selText("f_gazar"));
+    lines.push("Гэрч байсан     : " + (getRadio("witness") || "Хоосон"));
+    lines.push("");
+    lines.push("Дэлгэрэнгүй тайлбар:");
+    lines.push(vText("f_tailbar"));
+    lines.push("");
+    lines.push("[4. ДЭЭРЭЛХЭГЧИЙН МЭДЭЭЛЭЛ]");
+    lines.push("Нэр             : " + vText("f_bully_ner"));
+    lines.push("Анги, бүлэг     : " + vText("f_bully_angi"));
+    lines.push("Хүйс            : " + (getRadio("bullyGender") || "Хоосон"));
+    lines.push("");
+    lines.push("Нэмэлт тодорхойлолт:");
+    lines.push(vText("f_bully_todorh"));
+    lines.push("");
+    lines.push("[5. ЯАРАЛТАЙ ТУСЛАМЖ]");
+    lines.push("Яаралтай эсэх   : " + (getRadio("urgent") || "Хоосон"));
+    lines.push("Мэдрэмж         : " + getChecks("feeling"));
+    lines.push("");
+    lines.push("[6. НЭМЭЛТ МЭДЭЭЛЭЛ]");
+    lines.push("Өмнө мэдэгдсэн  : " + (getRadio("prevReport") || "Хоосон"));
+    lines.push("Нотлох баримт   : " + getChecks("evidence"));
+    lines.push("Хэрэгтэй тусламж: " + getChecks("help"));
+    lines.push("");
+    lines.push("Нэмэлт тайлбар:");
+    lines.push(vText("f_nemeltel"));
+    lines.push("");
+    lines.push("================================");
+    return lines.join("\n");
   }
 
   function validate() {
@@ -1080,7 +1054,7 @@
     if (!getRadio("reporter")) { alert("Мэдэгдэгчийг сонгоно уу!"); return false; }
     if (!getRadio("frequency")) { alert("Давтамж сонгоно уу!"); return false; }
     if (vSelect("f_gazar") === 0) { alert("Болсон газар сонгоно уу!"); return false; }
-    if (!vText("f_tailbar")) { alert("Дэлгэрэнгүй тайлбар бичнэ үү!"); return false; }
+    if (vText("f_tailbar") === "Хоосон") { alert("Дэлгэрэнгүй тайлбар бичнэ үү!"); return false; }
     if (!getRadio("urgent")) { alert("Яаралтай эсэхийг сонгоно уу!"); return false; }
     return true;
   }
@@ -1090,7 +1064,6 @@
     var btn = document.querySelector(".submit-btn");
     btn.innerHTML = "Илгээж байна...";
     btn.disabled = true;
-
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       to_email: "M24MD2041@ufe.edu.mn",
       subject: "Дээрэлхэлтийн шинэ мэдэгдэл ирлээ",
