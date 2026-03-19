@@ -963,64 +963,22 @@
   emailjs.init(EMAILJS_PUBLIC_KEY);
 
   function toggleAnon(el) {
-    var f = document.getElementById('anonFields');
-    f.style.opacity = el.checked ? '0.3' : '1';
-    f.style.pointerEvents = el.checked ? 'none' : 'auto';
+    var f = document.getElementById("anonFields");
+    f.style.opacity = el.checked ? "0.3" : "1";
+    f.style.pointerEvents = el.checked ? "none" : "auto";
   }
 
   function getRadio(name) {
-    var el = document.querySelector('input[name="' + name + '"]:checked');
-    return el ? el.value : 'Хоосон';
+    var el = document.querySelector("input[name=" + name + "]:checked");
+    return el ? el.value : "";
   }
 
   function getChecks(name) {
-    var els = document.querySelectorAll('input[name="' + name + '"]:checked');
-    if (!els.length) return 'Хоосон';
+    var els = document.querySelectorAll("input[name=" + name + "]:checked");
+    if (!els.length) return "Хоосон";
     var r = [];
     for (var i = 0; i < els.length; i++) r.push(els[i].value);
-    return r.join(', ');
-  }
-
-  function v(id) {
-    var el = document.getElementById(id);
-    return el ? (el.value.trim() || 'Хоосон') : 'Хоосон';
-  }
-
-  function buildSummary() {
-    var anon = document.getElementById('anonToggle').checked;
-    var s = '=== ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ ===\n\n';
-    s += '[1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ]\n';
-    s += 'Нэрээ нууцалсан : ' + (anon ? 'Тийм' : 'Үгүй') + '\n';
-    if (!anon) {
-      s += 'Нэр, овог       : ' + v('f_ner') + '\n';
-      s += 'Хүйс            : ' + getRadio('gender') + '\n';
-    }
-    s += 'Анги            : ' + v('f_angi') + '\n';
-    s += 'Бүлэг           : ' + v('f_buleg') + '\n';
-    s += 'Мэдэгдэгч       : ' + getRadio('reporter') + '\n';
-    s += '\n[2. ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ]\n';
-    s += 'Төрлүүд         : ' + getChecks('type') + '\n';
-    s += 'Давтамж         : ' + getRadio('frequency') + '\n';
-    s += '\n[3. БОЛСОН НӨХЦӨЛ]\n';
-    s += 'Огноо           : ' + v('f_ognoo') + '\n';
-    s += 'Газар           : ' + v('f_gazar') + '\n';
-    s += 'Гэрч байсан     : ' + getRadio('witness') + '\n';
-    s += '\nДэлгэрэнгүй тайлбар:\n' + v('f_tailbar') + '\n';
-    s += '\n[4. ДЭЭРЭЛХЭГЧИЙН МЭДЭЭЛЭЛ]\n';
-    s += 'Нэр             : ' + v('f_bully_ner') + '\n';
-    s += 'Анги, бүлэг     : ' + v('f_bully_angi') + '\n';
-    s += 'Хүйс            : ' + getRadio('bullyGender') + '\n';
-    s += '\nНэмэлт тодорхойлолт:\n' + v('f_bully_todorh') + '\n';
-    s += '\n[5. ЯАРАЛТАЙ ТУСЛАМЖ]\n';
-    s += 'Яаралтай эсэх   : ' + getRadio('urgent') + '\n';
-    s += 'Мэдрэмж         : ' + getChecks('feeling') + '\n';
-    s += '\n[6. НЭМЭЛТ МЭДЭЭЛЭЛ]\n';
-    s += 'Өмнө мэдэгдсэн  : ' + getRadio('prevReport') + '\n';
-    s += 'Нотлох баримт   : ' + getChecks('evidence') + '\n';
-    s += 'Хэрэгтэй тусламж: ' + getChecks('help') + '\n';
-    s += '\nНэмэлт тайлбар:\n' + v('f_nemeltel') + '\n';
-    s += '\n================================\n';
-    return s;
+    return r.join(", ");
   }
 
   function vSelect(id) {
@@ -1028,55 +986,137 @@
     return el ? el.selectedIndex : 0;
   }
 
+  function vText(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : "";
+  }
+
+  function buildMsg() {
+    var anon = document.getElementById("anonToggle").checked;
+    var s = "=== ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ ===
+
+";
+    s += "[1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ]
+";
+    s += "Нэрээ нууцалсан : " + (anon ? "Тийм" : "Үгүй") + "
+";
+    if (!anon) {
+      s += "Нэр, овог       : " + (vText("f_ner") || "Хоосон") + "
+";
+      s += "Хүйс            : " + (getRadio("gender") || "Хоосон") + "
+";
+    }
+    var angi = document.getElementById("f_angi");
+    var buleg = document.getElementById("f_buleg");
+    var gazar = document.getElementById("f_gazar");
+    s += "Анги            : " + (angi && angi.selectedIndex > 0 ? angi.options[angi.selectedIndex].text : "Хоосон") + "
+";
+    s += "Бүлэг           : " + (buleg && buleg.selectedIndex > 0 ? buleg.options[buleg.selectedIndex].text : "Хоосон") + "
+";
+    s += "Мэдэгдэгч       : " + (getRadio("reporter") || "Хоосон") + "
+";
+    s += "
+[2. ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ]
+";
+    s += "Төрлүүд         : " + getChecks("type") + "
+";
+    s += "Давтамж         : " + (getRadio("frequency") || "Хоосон") + "
+";
+    s += "
+[3. БОЛСОН НӨХЦӨЛ]
+";
+    s += "Огноо           : " + (vText("f_ognoo") || "Хоосон") + "
+";
+    s += "Газар           : " + (gazar && gazar.selectedIndex > 0 ? gazar.options[gazar.selectedIndex].text : "Хоосон") + "
+";
+    s += "Гэрч байсан     : " + (getRadio("witness") || "Хоосон") + "
+";
+    s += "
+Дэлгэрэнгүй тайлбар:
+" + (vText("f_tailbar") || "Хоосон") + "
+";
+    s += "
+[4. ДЭЭРЭЛХЭГЧИЙН МЭДЭЭЛЭЛ]
+";
+    s += "Нэр             : " + (vText("f_bully_ner") || "Хоосон") + "
+";
+    s += "Анги, бүлэг     : " + (vText("f_bully_angi") || "Хоосон") + "
+";
+    s += "Хүйс            : " + (getRadio("bullyGender") || "Хоосон") + "
+";
+    s += "
+Нэмэлт тодорхойлолт:
+" + (vText("f_bully_todorh") || "Хоосон") + "
+";
+    s += "
+[5. ЯАРАЛТАЙ ТУСЛАМЖ]
+";
+    s += "Яаралтай эсэх   : " + (getRadio("urgent") || "Хоосон") + "
+";
+    s += "Мэдрэмж         : " + getChecks("feeling") + "
+";
+    s += "
+[6. НЭМЭЛТ МЭДЭЭЛЭЛ]
+";
+    s += "Өмнө мэдэгдсэн  : " + (getRadio("prevReport") || "Хоосон") + "
+";
+    s += "Нотлох баримт   : " + getChecks("evidence") + "
+";
+    s += "Хэрэгтэй тусламж: " + getChecks("help") + "
+";
+    s += "
+Нэмэлт тайлбар:
+" + (vText("f_nemeltel") || "Хоосон") + "
+";
+    s += "
+================================
+";
+    return s;
+  }
+
   function validate() {
-    if (vSelect('f_angi') === 0) { alert('Анги сонгоно уу!'); return false; }
-    if (vSelect('f_buleg') === 0) { alert('Бүлэг сонгоно уу!'); return false; }
-    if (getRadio('reporter') === 'Хоосон') { alert('Мэдэгдэгчийг сонгоно уу!'); return false; }
-    if (getRadio('frequency') === 'Хоосон') { alert('Давтамж сонгоно уу!'); return false; }
-    if (vSelect('f_gazar') === 0) { alert('Болсон газар сонгоно уу!'); return false; }
-    var tb = document.getElementById('f_tailbar');
-    if (!tb || !tb.value.trim()) { alert('Дэлгэрэнгүй тайлбар бичнэ үү!'); return false; }
-    if (getRadio('urgent') === 'Хоосон') { alert('Яаралтай эсэхийг сонгоно уу!'); return false; }
+    if (vSelect("f_angi") === 0) { alert("Анги сонгоно уу!"); return false; }
+    if (vSelect("f_buleg") === 0) { alert("Бүлэг сонгоно уу!"); return false; }
+    if (!getRadio("reporter")) { alert("Мэдэгдэгчийг сонгоно уу!"); return false; }
+    if (!getRadio("frequency")) { alert("Давтамж сонгоно уу!"); return false; }
+    if (vSelect("f_gazar") === 0) { alert("Болсон газар сонгоно уу!"); return false; }
+    if (!vText("f_tailbar")) { alert("Дэлгэрэнгүй тайлбар бичнэ үү!"); return false; }
+    if (!getRadio("urgent")) { alert("Яаралтай эсэхийг сонгоно уу!"); return false; }
     return true;
   }
 
   function handleSubmit() {
     if (!validate()) return;
-    var btn = document.querySelector('.submit-btn');
-    btn.innerHTML = 'Илгээж байна...';
+    var btn = document.querySelector(".submit-btn");
+    btn.innerHTML = "Илгээж байна...";
     btn.disabled = true;
 
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      to_email: 'M24MD2041@ufe.edu.mn',
-      subject: 'Дээрэлхэлтийн шинэ мэдэгдэл ирлээ',
-      message: buildSummary()
+      to_email: "M24MD2041@ufe.edu.mn",
+      subject: "Дээрэлхэлтийн шинэ мэдэгдэл ирлээ",
+      message: buildMsg()
     }).then(function() {
-      document.getElementById('formWrap').style.display = 'none';
-      document.getElementById('successScreen').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById("formWrap").style.display = "none";
+      document.getElementById("successScreen").style.display = "block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }, function(err) {
-      console.error('EmailJS error:', JSON.stringify(err));
-      btn.innerHTML = 'Мэдэгдэл илгээх';
+      console.error("EmailJS error:", JSON.stringify(err));
+      btn.innerHTML = "Мэдэгдэл илгээх";
       btn.disabled = false;
-      alert('Алдаа гарлаа. Дахин оролдоно уу.');
+      alert("Алдаа гарлаа. Дахин оролдоно уу.");
     });
   }
 
   function resetForm() {
-    var inputs = document.querySelectorAll('input[type=text], textarea');
-    for (var i = 0; i < inputs.length; i++) inputs[i].value = '';
-    var checks = document.querySelectorAll('input[type=radio], input[type=checkbox]');
-    for (var i = 0; i < checks.length; i++) checks[i].checked = false;
-    var selects = document.querySelectorAll('select');
-    for (var i = 0; i < selects.length; i++) selects[i].selectedIndex = 0;
-    var og = document.getElementById('f_ognoo');
-    if (og) og.value = '';
-    var tog = document.getElementById('anonToggle');
-    if (tog) tog.checked = false;
+    document.querySelectorAll("input[type=text], textarea").forEach(function(el) { el.value = ""; });
+    document.querySelectorAll("input[type=radio], input[type=checkbox]").forEach(function(el) { el.checked = false; });
+    document.querySelectorAll("select").forEach(function(el) { el.selectedIndex = 0; });
+    var og = document.getElementById("f_ognoo"); if (og) og.value = "";
+    var tog = document.getElementById("anonToggle"); if (tog) tog.checked = false;
     toggleAnon({ checked: false });
-    document.getElementById('formWrap').style.display = 'flex';
-    document.getElementById('successScreen').style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById("formWrap").style.display = "flex";
+    document.getElementById("successScreen").style.display = "none";
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 </script>
 
