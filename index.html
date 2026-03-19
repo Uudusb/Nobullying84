@@ -1023,13 +1023,19 @@
     return s;
   }
 
+  function vSelect(id) {
+    var el = document.getElementById(id);
+    return el ? el.selectedIndex : 0;
+  }
+
   function validate() {
-    if (v('f_angi') === 'Хоосон') { alert('Анги сонгоно уу!'); return false; }
-    if (v('f_buleg') === 'Хоосон') { alert('Бүлэг сонгоно уу!'); return false; }
+    if (vSelect('f_angi') === 0) { alert('Анги сонгоно уу!'); return false; }
+    if (vSelect('f_buleg') === 0) { alert('Бүлэг сонгоно уу!'); return false; }
     if (getRadio('reporter') === 'Хоосон') { alert('Мэдэгдэгчийг сонгоно уу!'); return false; }
     if (getRadio('frequency') === 'Хоосон') { alert('Давтамж сонгоно уу!'); return false; }
-    if (v('f_gazar') === 'Хоосон') { alert('Болсон газар сонгоно уу!'); return false; }
-    if (v('f_tailbar') === 'Хоосон') { alert('Дэлгэрэнгүй тайлбар бичнэ үү!'); return false; }
+    if (vSelect('f_gazar') === 0) { alert('Болсон газар сонгоно уу!'); return false; }
+    var tb = document.getElementById('f_tailbar');
+    if (!tb || !tb.value.trim()) { alert('Дэлгэрэнгүй тайлбар бичнэ үү!'); return false; }
     if (getRadio('urgent') === 'Хоосон') { alert('Яаралтай эсэхийг сонгоно уу!'); return false; }
     return true;
   }
