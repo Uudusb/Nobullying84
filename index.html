@@ -437,7 +437,7 @@
 </div>
 
 <!-- MAIN FORM -->
-<form class="form-wrap" id="reportForm" action="https://formspree.io/f/xojkreqk" method="POST" onsubmit="handleSubmit(event)">
+<div id="formWrap"><form class="form-wrap" id="reportForm" action="https://formspree.io/f/xojkreqk" method="POST" onsubmit="handleSubmit(event)">
 <input type="hidden" name="_replyto" value="M24MD2041@ufe.edu.mn">
 <input type="hidden" name="_subject" value="🛡️ Шинэ дээрэлхэлтийн мэдэгдэл ирлээ">
 <input type="hidden" name="_language" value="mn">
@@ -941,9 +941,7 @@
       🔒 Таны мэдэгдэл зөвхөн сургуулийн эрх бүхий багш, нийгмийн ажилтанд хүрнэ.<br>
       Форм илгээсний дараа нэмэлт асуулт байвал чамтай холбогдож болно.
     </p>
-    <button type="submit" class="submit-btn">
-      ✉️ Мэдэгдэл илгээх
-    </button>
+    <button type="button" class="submit-btn" onclick="handleSubmit()">✉️ Мэдэгдэл илгээх</button>
   </div>
 
 </form>
@@ -968,157 +966,124 @@
 
 <script>
   function toggleAnon(el) {
-    const fields = document.getElementById('anonFields');
-    if (el.checked) {
-      fields.style.opacity = '0.3';
-      fields.style.pointerEvents = 'none';
-    } else {
-      fields.style.opacity = '1';
-      fields.style.pointerEvents = 'auto';
-    }
+    var f = document.getElementById('anonFields');
+    f.style.opacity = el.checked ? '0.3' : '1';
+    f.style.pointerEvents = el.checked ? 'none' : 'auto';
   }
 
-  // Value → Mongolian label maps
-  const labels = {
-    gender:      { male:'Хөвгүүн', female:'Охин', other:'Бусад' },
-    reporter:    { self:'Өөрөө дээрэлхэгдэж байгаа', friend:'Найзынхаа талаар мэдэгдэж байгаа', witness:'Гэрч болсон' },
-    type:        { verbal:'Хэл амаар (доромжлол)', physical:'Бие махбодийн (зодох, түлхэх)', cyber:'Цахим дээрэлхэлт', exclusion:'Гадуурхалт', property:'Эд хөрөнгийн', threat:'Заналхийлэл', discrimination:'Үндэс/гадаад төрхийн хавчлага', other:'Бусад' },
-    frequency:   { once:'Нэг удаа болсон', few:'Хэд хэдэн удаа болсон', weekly:'Долоо хоног бүр', daily:'Өдөр бүр' },
-    witness:     { yes:'Тийм, байсан', no:'Байгаагүй', unknown:'Мэдэхгүй' },
-    bullyGender: { male:'Хөвгүүн', female:'Охин', group:'Бүлэг', unknown:'Мэдэхгүй' },
-    urgent:      { yes_urgent:'🚨 ЯАРАЛТАЙ — эрүүл мэнд, аюул', yes_soon:'⚡ Удахгүй тусламж хэрэгтэй', no_report:'📋 Яаралтай биш, мэдэгдэж байна' },
-    feeling:     { scared:'Айж байна', sad:'Гунигтай', angry:'Уурлаж байна', confused:'Эргэлзэж байна', ok:'Хэвийн', brave:'Зоригтой' },
-    prevReport:  { yes:'Тийм, өмнө мэдэгдсэн', no:'Үгүй, анх удаа' },
-    evidence:    { screenshot:'Дэлгэцийн зураг (screenshot)', message:'Мессеж/чат', video:'Видео/аудио', witness_name:'Гэрчийн нэр бий' },
-    help:        { talk:'Багш/сэтгэл зүйчтэй ярилцуулах', mediation:'Дээрэлхэгчтэй зохицуулалт', parents:'Эцэг эхэд мэдэгдэх', anonymous_only:'Зөвхөн бүртгэгдэх' }
-  };
-
   function getRadio(name) {
-    const el = document.querySelector(`input[name="${name}"]:checked`);
-    return el ? (labels[name]?.[el.value] || el.value) : '—';
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : '-';
   }
 
   function getCheckboxes(name) {
-    const checked = [...document.querySelectorAll(`input[name="${name}"]:checked`)];
-    if (!checked.length) return '—';
-    return checked.map(el => labels[name]?.[el.value] || el.value).join(', ');
+    var checked = document.querySelectorAll('input[name="' + name + '"]:checked');
+    if (!checked.length) return '-';
+    var vals = [];
+    for (var i = 0; i < checked.length; i++) vals.push(checked[i].value);
+    return vals.join(', ');
   }
 
-  function getSelect(idx) {
-    const selects = document.querySelectorAll('select');
-    return selects[idx]?.value || '—';
-  }
-
-  function getText(idx) {
-    const inputs = document.querySelectorAll('input[type="text"]');
-    return inputs[idx]?.value?.trim() || '—';
-  }
-
-  function getDate() {
-    const d = document.querySelector('input[type="date"]');
-    return d?.value || '—';
-  }
-
-  function getTextarea(idx) {
-    const areas = document.querySelectorAll('textarea');
-    return areas[idx]?.value?.trim() || '—';
+  function v(id) {
+    var el = document.getElementById(id);
+    return el ? (el.value || '-') : '-';
   }
 
   function buildSummary() {
-    const isAnon = document.getElementById('anonToggle').checked;
-    const lines = [];
-    lines.push('════════════════════════════════');
-    lines.push('🛡️  ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ');
-    lines.push('════════════════════════════════');
-    lines.push('');
-    lines.push('【 1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ 】');
-    lines.push(`Нэрээ нууцалсан эсэх : ${isAnon ? 'Тийм (нэрээ нууцалсан)' : 'Үгүй'}`);
+    var isAnon = document.getElementById('anonToggle').checked;
+    var s = '';
+    s += '=== DEERELKHELTIIN MEDEGLEL ===\n\n';
+    s += '[ 1. MEDEGECHIIIN MEDEELEL ]\n';
+    s += 'Nerec nuutsalsan : ' + (isAnon ? 'Tiim' : 'Ugui') + '\n';
     if (!isAnon) {
-      lines.push(`Нэр, овог             : ${getText(0)}`);
-      lines.push(`Хүйс                  : ${getRadio('gender')}`);
+      s += 'Ner, ovog        : ' + v('f_ner') + '\n';
+      s += 'Khuis            : ' + getRadio('gender') + '\n';
     }
-    lines.push(`Анги                  : ${getSelect(0)}`);
-    lines.push(`Бүлэг                 : ${getSelect(1)}`);
-    lines.push(`Мэдэгдэгч             : ${getRadio('reporter')}`);
-    lines.push('');
-    lines.push('【 2. ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ 】');
-    lines.push(`Төрлүүд               : ${getCheckboxes('type')}`);
-    lines.push(`Давтамж               : ${getRadio('frequency')}`);
-    lines.push('');
-    lines.push('【 3. БОЛСОН НӨХЦӨЛ 】');
-    lines.push(`Огноо                 : ${getDate()}`);
-    lines.push(`Газар                 : ${getSelect(2)}`);
-    lines.push(`Гэрч байсан эсэх      : ${getRadio('witness')}`);
-    lines.push('');
-    lines.push('Дэлгэрэнгүй тайлбар:');
-    lines.push(getTextarea(0));
-    lines.push('');
-    lines.push('【 4. ДЭЭРЭЛХЭГЧИЙН МЭДЭЭЛЭЛ 】');
-    lines.push(`Нэр                   : ${getText(1)}`);
-    lines.push(`Анги, бүлэг           : ${getText(2)}`);
-    lines.push(`Хүйс                  : ${getRadio('bullyGender')}`);
-    lines.push('Нэмэлт тодорхойлолт:');
-    lines.push(getTextarea(1));
-    lines.push('');
-    lines.push('【 5. ЯАРАЛТАЙ ТУСЛАМЖ 】');
-    lines.push(`Яаралтай эсэх         : ${getRadio('urgent')}`);
-    lines.push(`Мэдрэмж               : ${getCheckboxes('feeling')}`);
-    lines.push('');
-    lines.push('【 6. НЭМЭЛТ МЭДЭЭЛЭЛ 】');
-    lines.push(`Өмнө мэдэгдсэн эсэх   : ${getRadio('prevReport')}`);
-    lines.push(`Нотлох баримт         : ${getCheckboxes('evidence')}`);
-    lines.push(`Хэрэгтэй тусламж      : ${getCheckboxes('help')}`);
-    lines.push('Нэмэлт тайлбар:');
-    lines.push(getTextarea(2));
-    lines.push('');
-    lines.push('════════════════════════════════');
-    return lines.join('\n');
+    s += 'Angi             : ' + v('f_angi') + '\n';
+    s += 'Buleg            : ' + v('f_buleg') + '\n';
+    s += 'Medegedech       : ' + getRadio('reporter') + '\n';
+    s += '\n[ 2. DEERELKHELTIIN TOROL ]\n';
+    s += 'Torlууд          : ' + getCheckboxes('type') + '\n';
+    s += 'Davtamj          : ' + getRadio('frequency') + '\n';
+    s += '\n[ 3. BOLSON NОKHTSOL ]\n';
+    s += 'Ognoo            : ' + v('f_ognoo') + '\n';
+    s += 'Gazar            : ' + v('f_gazar') + '\n';
+    s += 'Getech baisан    : ' + getRadio('witness') + '\n';
+    s += '\nDelgerengui tailbar:\n' + v('f_tailbar') + '\n';
+    s += '\n[ 4. DEERELKHEGCHIIN MEDEELEL ]\n';
+    s += 'Ner              : ' + v('f_bully_ner') + '\n';
+    s += 'Angi, buleg      : ' + v('f_bully_angi') + '\n';
+    s += 'Khuis            : ' + getRadio('bullyGender') + '\n';
+    s += 'Nemeltel todorkh:\n' + v('f_bully_todorh') + '\n';
+    s += '\n[ 5. YAARALTAL TUSLAM ]\n';
+    s += 'Yaaraltal esekh  : ' + getRadio('urgent') + '\n';
+    s += 'Medremj          : ' + getCheckboxes('feeling') + '\n';
+    s += '\n[ 6. NEMELTEL MEDEELEL ]\n';
+    s += 'Omnо medegsed    : ' + getRadio('prevReport') + '\n';
+    s += 'Notlokh barimta  : ' + getCheckboxes('evidence') + '\n';
+    s += 'Kherегtei tuslam : ' + getCheckboxes('help') + '\n';
+    s += 'Nemeltel tailbar:\n' + v('f_nemeltel') + '\n';
+    s += '\n================================\n';
+    return s;
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const form = document.getElementById('reportForm');
-    const btn = form.querySelector('.submit-btn');
-    btn.innerHTML = '⏳ Илгээж байна...';
+  function validate() {
+    if (!v('f_angi') || v('f_angi') === '-') { alert('Анги сонгоно уу!'); return false; }
+    if (!v('f_buleg') || v('f_buleg') === '-') { alert('Бүлэг сонгоно уу!'); return false; }
+    if (getRadio('reporter') === '-') { alert('Мэдэгдэгчийг сонгоно уу!'); return false; }
+    if (getRadio('frequency') === '-') { alert('Давтамж сонгоно уу!'); return false; }
+    if (!v('f_gazar') || v('f_gazar') === '-') { alert('Болсон газар сонгоно уу!'); return false; }
+    var tb = document.getElementById('f_tailbar');
+    if (!tb || !tb.value.trim()) { alert('Дэлгэрэнгүй тайлбар бичнэ үү!'); return false; }
+    if (getRadio('urgent') === '-') { alert('Яаралтай эсэхийг сонгоно уу!'); return false; }
+    return true;
+  }
+
+  function handleSubmit() {
+    if (!validate()) return;
+    var btn = document.querySelector('.submit-btn');
+    btn.innerHTML = 'Илгээж байна...';
     btn.disabled = true;
 
-    // Build Mongolian summary and put into hidden field
-    document.getElementById('summaryField').value = buildSummary();
-
-    const formData = new FormData();
+    var summary = buildSummary();
+    var formData = new FormData();
     formData.append('_replyto', 'M24MD2041@ufe.edu.mn');
-    formData.append('_subject', '🛡️ Шинэ дээрэлхэлтийн мэдэгдэл ирлээ');
-    formData.append('📋 МЭДЭГДЛИЙН ДЭЛГЭРЭНГҮЙ', document.getElementById('summaryField').value);
+    formData.append('_subject', 'Shinе deerelkheltiin medeglel irlee');
+    formData.append('Medeglel', summary);
 
-    try {
-      const response = await fetch('https://formspree.io/f/xojkreqk', {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      });
-
-      if (response.ok) {
-        form.style.display = 'none';
-        const success = document.getElementById('successScreen');
-        success.style.display = 'block';
+    fetch('https://formspree.io/f/xojkreqk', {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    }).then(function(res) {
+      if (res.ok) {
+        document.getElementById('formWrap').style.display = 'none';
+        document.getElementById('successScreen').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        btn.innerHTML = '❌ Алдаа гарлаа. Дахин оролдоно уу.';
+        btn.innerHTML = 'Алдаа гарлаа. Дахин оролдоно уу.';
         btn.disabled = false;
       }
-    } catch (err) {
-      btn.innerHTML = '❌ Интернет холболт шалгаарай.';
+    }).catch(function() {
+      btn.innerHTML = 'Интернет холболт шалгаарай.';
       btn.disabled = false;
-    }
+    });
   }
 
   function resetForm() {
-    document.getElementById('reportForm').reset();
-    document.getElementById('reportForm').style.display = 'flex';
+    var inputs = document.querySelectorAll('input[type=text], textarea');
+    for (var i = 0; i < inputs.length; i++) inputs[i].value = '';
+    var radios = document.querySelectorAll('input[type=radio], input[type=checkbox]');
+    for (var i = 0; i < radios.length; i++) radios[i].checked = false;
+    var selects = document.querySelectorAll('select');
+    for (var i = 0; i < selects.length; i++) selects[i].selectedIndex = 0;
+    var ognoo = document.getElementById('f_ognoo');
+    if (ognoo) ognoo.value = '';
+    var tog = document.getElementById('anonToggle');
+    if (tog) tog.checked = false;
+    toggleAnon({ checked: false });
+    document.getElementById('formWrap').style.display = 'flex';
     document.getElementById('successScreen').style.display = 'none';
-    const fields = document.getElementById('anonFields');
-    fields.style.opacity = '1';
-    fields.style.pointerEvents = 'auto';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 </script>
