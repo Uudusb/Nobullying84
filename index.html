@@ -978,17 +978,120 @@
     }
   }
 
+  // Value → Mongolian label maps
+  const labels = {
+    gender:      { male:'Хөвгүүн', female:'Охин', other:'Бусад' },
+    reporter:    { self:'Өөрөө дээрэлхэгдэж байгаа', friend:'Найзынхаа талаар мэдэгдэж байгаа', witness:'Гэрч болсон' },
+    type:        { verbal:'Хэл амаар (доромжлол)', physical:'Бие махбодийн (зодох, түлхэх)', cyber:'Цахим дээрэлхэлт', exclusion:'Гадуурхалт', property:'Эд хөрөнгийн', threat:'Заналхийлэл', discrimination:'Үндэс/гадаад төрхийн хавчлага', other:'Бусад' },
+    frequency:   { once:'Нэг удаа болсон', few:'Хэд хэдэн удаа болсон', weekly:'Долоо хоног бүр', daily:'Өдөр бүр' },
+    witness:     { yes:'Тийм, байсан', no:'Байгаагүй', unknown:'Мэдэхгүй' },
+    bullyGender: { male:'Хөвгүүн', female:'Охин', group:'Бүлэг', unknown:'Мэдэхгүй' },
+    urgent:      { yes_urgent:'🚨 ЯАРАЛТАЙ — эрүүл мэнд, аюул', yes_soon:'⚡ Удахгүй тусламж хэрэгтэй', no_report:'📋 Яаралтай биш, мэдэгдэж байна' },
+    feeling:     { scared:'Айж байна', sad:'Гунигтай', angry:'Уурлаж байна', confused:'Эргэлзэж байна', ok:'Хэвийн', brave:'Зоригтой' },
+    prevReport:  { yes:'Тийм, өмнө мэдэгдсэн', no:'Үгүй, анх удаа' },
+    evidence:    { screenshot:'Дэлгэцийн зураг (screenshot)', message:'Мессеж/чат', video:'Видео/аудио', witness_name:'Гэрчийн нэр бий' },
+    help:        { talk:'Багш/сэтгэл зүйчтэй ярилцуулах', mediation:'Дээрэлхэгчтэй зохицуулалт', parents:'Эцэг эхэд мэдэгдэх', anonymous_only:'Зөвхөн бүртгэгдэх' }
+  };
+
+  function getRadio(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? (labels[name]?.[el.value] || el.value) : '—';
+  }
+
+  function getCheckboxes(name) {
+    const checked = [...document.querySelectorAll(`input[name="${name}"]:checked`)];
+    if (!checked.length) return '—';
+    return checked.map(el => labels[name]?.[el.value] || el.value).join(', ');
+  }
+
+  function getSelect(idx) {
+    const selects = document.querySelectorAll('select');
+    return selects[idx]?.value || '—';
+  }
+
+  function getText(idx) {
+    const inputs = document.querySelectorAll('input[type="text"]');
+    return inputs[idx]?.value?.trim() || '—';
+  }
+
+  function getDate() {
+    const d = document.querySelector('input[type="date"]');
+    return d?.value || '—';
+  }
+
+  function getTextarea(idx) {
+    const areas = document.querySelectorAll('textarea');
+    return areas[idx]?.value?.trim() || '—';
+  }
+
+  function buildSummary() {
+    const isAnon = document.getElementById('anonToggle').checked;
+    const lines = [];
+    lines.push('════════════════════════════════');
+    lines.push('🛡️  ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ');
+    lines.push('════════════════════════════════');
+    lines.push('');
+    lines.push('【 1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ 】');
+    lines.push(`Нэрээ нууцалсан эсэх : ${isAnon ? 'Тийм (нэрээ нууцалсан)' : 'Үгүй'}`);
+    if (!isAnon) {
+      lines.push(`Нэр, овог             : ${getText(0)}`);
+      lines.push(`Хүйс                  : ${getRadio('gender')}`);
+    }
+    lines.push(`Анги                  : ${getSelect(0)}`);
+    lines.push(`Бүлэг                 : ${getSelect(1)}`);
+    lines.push(`Мэдэгдэгч             : ${getRadio('reporter')}`);
+    lines.push('');
+    lines.push('【 2. ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ 】');
+    lines.push(`Төрлүүд               : ${getCheckboxes('type')}`);
+    lines.push(`Давтамж               : ${getRadio('frequency')}`);
+    lines.push('');
+    lines.push('【 3. БОЛСОН НӨХЦӨЛ 】');
+    lines.push(`Огноо                 : ${getDate()}`);
+    lines.push(`Газар                 : ${getSelect(2)}`);
+    lines.push(`Гэрч байсан эсэх      : ${getRadio('witness')}`);
+    lines.push('');
+    lines.push('Дэлгэрэнгүй тайлбар:');
+    lines.push(getTextarea(0));
+    lines.push('');
+    lines.push('【 4. ДЭЭРЭЛХЭГЧИЙН МЭДЭЭЛЭЛ 】');
+    lines.push(`Нэр                   : ${getText(1)}`);
+    lines.push(`Анги, бүлэг           : ${getText(2)}`);
+    lines.push(`Хүйс                  : ${getRadio('bullyGender')}`);
+    lines.push('Нэмэлт тодорхойлолт:');
+    lines.push(getTextarea(1));
+    lines.push('');
+    lines.push('【 5. ЯАРАЛТАЙ ТУСЛАМЖ 】');
+    lines.push(`Яаралтай эсэх         : ${getRadio('urgent')}`);
+    lines.push(`Мэдрэмж               : ${getCheckboxes('feeling')}`);
+    lines.push('');
+    lines.push('【 6. НЭМЭЛТ МЭДЭЭЛЭЛ 】');
+    lines.push(`Өмнө мэдэгдсэн эсэх   : ${getRadio('prevReport')}`);
+    lines.push(`Нотлох баримт         : ${getCheckboxes('evidence')}`);
+    lines.push(`Хэрэгтэй тусламж      : ${getCheckboxes('help')}`);
+    lines.push('Нэмэлт тайлбар:');
+    lines.push(getTextarea(2));
+    lines.push('');
+    lines.push('════════════════════════════════');
+    return lines.join('\n');
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     const form = document.getElementById('reportForm');
     const btn = form.querySelector('.submit-btn');
-    btn.textContent = '⏳ Илгээж байна...';
+    btn.innerHTML = '⏳ Илгээж байна...';
     btn.disabled = true;
 
-    const formData = new FormData(form);
+    // Build Mongolian summary and put into hidden field
+    document.getElementById('summaryField').value = buildSummary();
+
+    const formData = new FormData();
+    formData.append('_replyto', 'M24MD2041@ufe.edu.mn');
+    formData.append('_subject', '🛡️ Шинэ дээрэлхэлтийн мэдэгдэл ирлээ');
+    formData.append('📋 МЭДЭГДЛИЙН ДЭЛГЭРЭНГҮЙ', document.getElementById('summaryField').value);
 
     try {
-      const response = await fetch(form.action, {
+      const response = await fetch('https://formspree.io/f/xojkreqk', {
         method: 'POST',
         body: formData,
         headers: { 'Accept': 'application/json' }
@@ -1000,11 +1103,11 @@
         success.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        btn.textContent = '❌ Алдаа гарлаа. Дахин оролдоно уу.';
+        btn.innerHTML = '❌ Алдаа гарлаа. Дахин оролдоно уу.';
         btn.disabled = false;
       }
     } catch (err) {
-      btn.textContent = '❌ Интернет холболт шалгаарай.';
+      btn.innerHTML = '❌ Интернет холболт шалгаарай.';
       btn.disabled = false;
     }
   }
@@ -1013,7 +1116,6 @@
     document.getElementById('reportForm').reset();
     document.getElementById('reportForm').style.display = 'flex';
     document.getElementById('successScreen').style.display = 'none';
-    // reset anon fields
     const fields = document.getElementById('anonFields');
     fields.style.opacity = '1';
     fields.style.pointerEvents = 'auto';
