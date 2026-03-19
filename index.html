@@ -474,7 +474,7 @@
               Нэр, овог
               <span class="opt-tag">Заавал биш</span>
             </label>
-            <input type="text" placeholder="Жишээ: Болд Батаа">
+            <input type="text" id="f_ner" placeholder="Жишээ: Болд Батаа">
           </div>
           <div class="field">
             <label class="field-label">
@@ -499,7 +499,7 @@
       <div class="row2">
         <div class="field">
           <label class="field-label">Анги <span class="req">*</span></label>
-          <select required>
+          <select id="f_angi" required>
             <option value="">— Анги сонгох —</option>
             <option>1-р анги</option><option>2-р анги</option><option>3-р анги</option>
             <option>4-р анги</option><option>5-р анги</option><option>6-р анги</option>
@@ -509,7 +509,7 @@
         </div>
         <div class="field">
           <label class="field-label">Бүлэг <span class="req">*</span></label>
-          <select required>
+          <select id="f_buleg" required>
             <option value="">— Бүлэг сонгох —</option>
             <option>А бүлэг</option><option>Б бүлэг</option><option>В бүлэг</option>
             <option>Г бүлэг</option><option>Д бүлэг</option><option>Е бүлэг</option>
@@ -648,11 +648,11 @@
       <div class="row2">
         <div class="field">
           <label class="field-label">Болсон огноо <span class="opt-tag">Ойролцоо байж болно</span></label>
-          <input type="date">
+          <input type="date" id="f_ognoo">
         </div>
         <div class="field">
           <label class="field-label">Болсон газар <span class="req">*</span></label>
-          <select required>
+          <select id="f_gazar" required>
             <option value="">— Газар сонгох —</option>
             <option>Анги дотор</option>
             <option>Хоолны газар (буфет)</option>
@@ -670,7 +670,7 @@
       <div class="field">
         <label class="field-label">Болсон зүйлийг дэлгэрэнгүй тайлбарлаарай <span class="req">*</span></label>
         <p class="field-hint">Чадах чинээгээрээ тодорхой бичсэн тусмаа бид тусалж чадна. Хэн ч чамайг буруутгахгүй. 💙</p>
-        <textarea placeholder="Жишээ: ... анги дотор ... нэртэй хүүхэд надад ... гэж хэлсэн, ... хийсэн ..." required></textarea>
+        <textarea id="f_tailbar" placeholder="Жишээ: ... анги дотор ... нэртэй хүүхэд надад ... гэж хэлсэн, ... хийсэн ..." required></textarea>
       </div>
 
       <div class="field">
@@ -711,11 +711,11 @@
       <div class="row2">
         <div class="field">
           <label class="field-label">Нэр <span class="opt-tag">Заавал биш</span></label>
-          <input type="text" placeholder="Нэр мэдэж байвал бичнэ үү">
+          <input type="text" id="f_bully_ner" placeholder="Нэр мэдэж байвал бичнэ үү">
         </div>
         <div class="field">
           <label class="field-label">Анги, бүлэг <span class="opt-tag">Заавал биш</span></label>
-          <input type="text" placeholder="Жишээ: 8А эсвэл 9-р анги">
+          <input type="text" id="f_bully_angi" placeholder="Жишээ: 8А эсвэл 9-р анги">
         </div>
       </div>
 
@@ -748,7 +748,7 @@
       <div class="field">
         <label class="field-label">Нэмэлт тодорхойлолт <span class="opt-tag">Заавал биш</span></label>
         <p class="field-hint">Харагдах байдал, хамт байсан хүмүүс г.м — мэдэж байгаа бол бичнэ үү</p>
-        <textarea placeholder="Жишээ: Ерөнхийдөө 3 хүүхэд байдаг, нэг нь цагаан малгайтай байдаг..." style="min-height:80px;"></textarea>
+        <textarea id="f_bully_todorh" placeholder="Жишээ: Ерөнхийдөө 3 хүүхэд байдаг, нэг нь цагаан малгайтай байдаг..." style="min-height:80px;"></textarea>
       </div>
 
     </div>
@@ -922,7 +922,7 @@
 
       <div class="field">
         <label class="field-label">Нэмэлт хэлэхийг хүссэн зүйл байна уу? <span class="opt-tag">Заавал биш</span></label>
-        <textarea placeholder="Энд чөлөөтэй бичнэ үү — ямар ч зүйл хэлж болно, шүүмжлэхгүй..."></textarea>
+        <textarea id="f_nemeltel" placeholder="Энд чөлөөтэй бичнэ үү — ямар ч зүйл хэлж болно, шүүмжлэхгүй..."></textarea>
       </div>
 
     </div>
