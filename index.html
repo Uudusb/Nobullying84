@@ -483,21 +483,16 @@
             <label class="field-label">
               Хүйс <span class="req">*</span>
             </label>
-            <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="options-grid" style="grid-template-columns:1fr 1fr;">
               <label class="opt-item">
-                <input type="radio" name="gender" value="male" required>
+                <input type="radio" name="gender" value="Эрэгтэй">
                 <span class="opt-box"></span>
-                <span class="opt-label">👦 Хөвгүүн</span>
+                <span class="opt-label">👦 Эрэгтэй</span>
               </label>
               <label class="opt-item">
-                <input type="radio" name="gender" value="female">
+                <input type="radio" name="gender" value="Эмэгтэй">
                 <span class="opt-box"></span>
-                <span class="opt-label">👧 Охин</span>
-              </label>
-              <label class="opt-item">
-                <input type="radio" name="gender" value="other">
-                <span class="opt-box"></span>
-                <span class="opt-label">🌈 Бусад</span>
+                <span class="opt-label">👧 Эмэгтэй</span>
               </label>
             </div>
           </div>
@@ -731,22 +726,22 @@
         <label class="field-label">Хүйс <span class="opt-tag">Заавал биш</span></label>
         <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
           <label class="opt-item">
-            <input type="radio" name="bullyGender" value="male">
+            <input type="radio" name="bullyGender" value="Эрэгтэй">
             <span class="opt-box"></span>
-            <span class="opt-label">👦 Хөвгүүн</span>
+            <span class="opt-label">👦 Эрэгтэй</span>
           </label>
           <label class="opt-item">
-            <input type="radio" name="bullyGender" value="female">
+            <input type="radio" name="bullyGender" value="Эмэгтэй">
             <span class="opt-box"></span>
-            <span class="opt-label">👧 Охин</span>
+            <span class="opt-label">👧 Эмэгтэй</span>
           </label>
           <label class="opt-item">
-            <input type="radio" name="bullyGender" value="group">
+            <input type="radio" name="bullyGender" value="Бүлэг">
             <span class="opt-box"></span>
             <span class="opt-label">👥 Бүлэг</span>
           </label>
           <label class="opt-item">
-            <input type="radio" name="bullyGender" value="unknown">
+            <input type="radio" name="bullyGender" value="Мэдэхгүй">
             <span class="opt-box"></span>
             <span class="opt-label">❓ Мэдэхгүй</span>
           </label>
@@ -965,134 +960,7 @@
   </div>
 </div>
 
-<script>
-  // ============================================================
-  // EMAILJS ТОХИРГОО - ЭДГЭЭР 3 КОДЫГ ӨӨРИЙНХӨӨРӨӨ СОЛИНО УУ
-  // emailjs.com -> Account -> General -> Public Key
-  var EMAILJS_PUBLIC_KEY  = "eo_6wWWDxsaqQ5zWh";
-  // emailjs.com -> Email Services -> Service ID
-  var EMAILJS_SERVICE_ID  = "service_notblih";
-  // emailjs.com -> Email Templates -> Template ID
-  var EMAILJS_TEMPLATE_ID = "template_rqweftd";
-  // ============================================================
 
-  emailjs.init(EMAILJS_PUBLIC_KEY);
-
-  function toggleAnon(el) {
-    var f = document.getElementById('anonFields');
-    f.style.opacity = el.checked ? '0.3' : '1';
-    f.style.pointerEvents = el.checked ? 'none' : 'auto';
-  }
-
-  function getRadio(name) {
-    var el = document.querySelector('input[name="' + name + '"]:checked');
-    return el ? el.value : 'Хоосон';
-  }
-
-  function getCheckboxes(name) {
-    var checked = document.querySelectorAll('input[name="' + name + '"]:checked');
-    if (!checked.length) return 'Хоосон';
-    var vals = [];
-    for (var i = 0; i < checked.length; i++) vals.push(checked[i].value);
-    return vals.join(', ');
-  }
-
-  function v(id) {
-    var el = document.getElementById(id);
-    return el ? (el.value.trim() || 'Хоосон') : 'Хоосон';
-  }
-
-  function buildSummary() {
-    var isAnon = document.getElementById('anonToggle').checked;
-    var s = '';
-    s += '=== ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ ===\n\n';
-    s += '[ 1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ ]\n';
-    s += 'Нэрээ нууцалсан  : ' + (isAnon ? 'Тийм' : 'Үгүй') + '\n';
-    if (!isAnon) {
-      s += 'Нэр, овог        : ' + v('f_ner') + '\n';
-      s += 'Хүйс             : ' + getRadio('gender') + '\n';
-    }
-    s += 'Анги             : ' + v('f_angi') + '\n';
-    s += 'Бүлэг            : ' + v('f_buleg') + '\n';
-    s += 'Мэдэгдэгч        : ' + getRadio('reporter') + '\n';
-    s += '\n[ 2. ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ ]\n';
-    s += 'Төрлүүд          : ' + getCheckboxes('type') + '\n';
-    s += 'Давтамж          : ' + getRadio('frequency') + '\n';
-    s += '\n[ 3. БОЛСОН НӨХЦӨЛ ]\n';
-    s += 'Огноо            : ' + v('f_ognoo') + '\n';
-    s += 'Газар            : ' + v('f_gazar') + '\n';
-    s += 'Гэрч байсан      : ' + getRadio('witness') + '\n';
-    s += '\nДэлгэрэнгүй тайлбар:\n' + v('f_tailbar') + '\n';
-    s += '\n[ 4. ДЭЭРЭЛХЭГЧИЙН МЭДЭЭЛЭЛ ]\n';
-    s += 'Нэр              : ' + v('f_bully_ner') + '\n';
-    s += 'Анги, бүлэг      : ' + v('f_bully_angi') + '\n';
-    s += 'Хүйс             : ' + getRadio('bullyGender') + '\n';
-    s += '\nНэмэлтэл тодорхойлолт:\n' + v('f_bully_todorh') + '\n';
-    s += '\n[ 5. ЯАРАЛТАЙ ТУСЛАМЖ ]\n';
-    s += 'Яаралтай эсэх    : ' + getRadio('urgent') + '\n';
-    s += 'Мэдрэмж          : ' + getCheckboxes('feeling') + '\n';
-    s += '\n[ 6. НЭМЭЛТЭЛ МЭДЭЭЛЭЛ ]\n';
-    s += 'Өмнө мэдэгдсэн   : ' + getRadio('prevReport') + '\n';
-    s += 'Нотлох баримт    : ' + getCheckboxes('evidence') + '\n';
-    s += 'Хэрэгтэй тусламж : ' + getCheckboxes('help') + '\n';
-    s += '\nНэмэлтэл тайлбар:\n' + v('f_nemeltel') + '\n';
-    s += '\n================================\n';
-    return s;
-  }
-
-  function validate() {
-    if (v('f_angi') === 'Хоосон') { alert('Анги сонгоно уу!'); return false; }
-    if (v('f_buleg') === 'Хоосон') { alert('Бүлэг сонгоно уу!'); return false; }
-    if (getRadio('reporter') === 'Хоосон') { alert('Мэдэгдэгчийг сонгоно уу!'); return false; }
-    if (getRadio('frequency') === 'Хоосон') { alert('Давтамж сонгоно уу!'); return false; }
-    if (v('f_gazar') === 'Хоосон') { alert('Болсон газар сонгоно уу!'); return false; }
-    var tb = document.getElementById('f_tailbar');
-    if (!tb || !tb.value.trim()) { alert('Дэлгэрэнгүй тайлбар бичнэ үү!'); return false; }
-    if (getRadio('urgent') === 'Хоосон') { alert('Яаралтай эсэхийг сонгоно уу!'); return false; }
-    return true;
-  }
-
-  function handleSubmit() {
-    if (!validate()) return;
-    var btn = document.querySelector('.submit-btn');
-    btn.innerHTML = 'Илгээж байна...';
-    btn.disabled = true;
-
-    var templateParams = {
-      to_email: 'M24MD2041@ufe.edu.mn',
-      subject: 'Дээрэлхэлтийн шинэ мэдэгдэл ирлээ',
-      message: buildSummary()
-    };
-
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-      .then(function() {
-        document.getElementById('formWrap').style.display = 'none';
-        document.getElementById('successScreen').style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, function(error) {
-        console.error('EmailJS error:', error);
-        btn.innerHTML = 'Алдаа гарлаа. Дахин оролдоно уу.';
-        btn.disabled = false;
-      });
-  }
-
-  function resetForm() {
-    var inputs = document.querySelectorAll('input[type=text], textarea');
-    for (var i = 0; i < inputs.length; i++) inputs[i].value = '';
-    var radios = document.querySelectorAll('input[type=radio], input[type=checkbox]');
-    for (var i = 0; i < radios.length; i++) radios[i].checked = false;
-    var selects = document.querySelectorAll('select');
-    for (var i = 0; i < selects.length; i++) selects[i].selectedIndex = 0;
-    var ognoo = document.getElementById('f_ognoo');
-    if (ognoo) ognoo.value = '';
-    var tog = document.getElementById('anonToggle');
-    if (tog) tog.checked = false;
-    toggleAnon({ checked: false });
-    document.getElementById('formWrap').style.display = 'flex';
-    document.getElementById('successScreen').style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-</script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+Mongolian&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1571,21 +1439,16 @@
             <label class="field-label">
               Хүйс <span class="req">*</span>
             </label>
-            <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="options-grid" style="grid-template-columns:1fr 1fr;">
               <label class="opt-item">
-                <input type="radio" name="gender" value="male" required>
+                <input type="radio" name="gender" value="Эрэгтэй">
                 <span class="opt-box"></span>
-                <span class="opt-label">👦 Хөвгүүн</span>
+                <span class="opt-label">👦 Эрэгтэй</span>
               </label>
               <label class="opt-item">
-                <input type="radio" name="gender" value="female">
+                <input type="radio" name="gender" value="Эмэгтэй">
                 <span class="opt-box"></span>
-                <span class="opt-label">👧 Охин</span>
-              </label>
-              <label class="opt-item">
-                <input type="radio" name="gender" value="other">
-                <span class="opt-box"></span>
-                <span class="opt-label">🌈 Бусад</span>
+                <span class="opt-label">👧 Эмэгтэй</span>
               </label>
             </div>
           </div>
@@ -1819,22 +1682,22 @@
         <label class="field-label">Хүйс <span class="opt-tag">Заавал биш</span></label>
         <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
           <label class="opt-item">
-            <input type="radio" name="bullyGender" value="male">
+            <input type="radio" name="bullyGender" value="Эрэгтэй">
             <span class="opt-box"></span>
-            <span class="opt-label">👦 Хөвгүүн</span>
+            <span class="opt-label">👦 Эрэгтэй</span>
           </label>
           <label class="opt-item">
-            <input type="radio" name="bullyGender" value="female">
+            <input type="radio" name="bullyGender" value="Эмэгтэй">
             <span class="opt-box"></span>
-            <span class="opt-label">👧 Охин</span>
+            <span class="opt-label">👧 Эмэгтэй</span>
           </label>
           <label class="opt-item">
-            <input type="radio" name="bullyGender" value="group">
+            <input type="radio" name="bullyGender" value="Бүлэг">
             <span class="opt-box"></span>
             <span class="opt-label">👥 Бүлэг</span>
           </label>
           <label class="opt-item">
-            <input type="radio" name="bullyGender" value="unknown">
+            <input type="radio" name="bullyGender" value="Мэдэхгүй">
             <span class="opt-box"></span>
             <span class="opt-label">❓ Мэдэхгүй</span>
           </label>
@@ -2054,6 +1917,11 @@
 </div>
 
 <script>
+  var EMAILJS_PUBLIC_KEY  = "eo_6wWWDxsaqQ5zWh";
+  var EMAILJS_SERVICE_ID  = "service_notblih";
+  var EMAILJS_TEMPLATE_ID = "template_rqweftd";
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+
   function toggleAnon(el) {
     var f = document.getElementById('anonFields');
     f.style.opacity = el.checked ? '0.3' : '1';
