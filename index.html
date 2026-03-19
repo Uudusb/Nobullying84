@@ -500,7 +500,7 @@
         <div class="field">
           <label class="field-label">Анги <span class="req">*</span></label>
           <select id="f_angi" required>
-            <option value="">— Анги сонгох —</option>
+            <option value="">Анги сонгох</option>
             <option>1-р анги</option><option>2-р анги</option><option>3-р анги</option>
             <option>4-р анги</option><option>5-р анги</option><option>6-р анги</option>
             <option>7-р анги</option><option>8-р анги</option><option>9-р анги</option>
@@ -510,9 +510,11 @@
         <div class="field">
           <label class="field-label">Бүлэг <span class="req">*</span></label>
           <select id="f_buleg" required>
-            <option value="">— Бүлэг сонгох —</option>
-            <option>А бүлэг</option><option>Б бүлэг</option><option>В бүлэг</option>
-            <option>Г бүлэг</option><option>Д бүлэг</option><option>Е бүлэг</option>
+            <option value="">Бүлэг сонгох</option>
+            <option>1-р бүлэг</option><option>2-р бүлэг</option><option>3-р бүлэг</option>
+            <option>4-р бүлэг</option><option>5-р бүлэг</option><option>6-р бүлэг</option>
+            <option>7-р бүлэг</option><option>8-р бүлэг</option><option>9-р бүлэг</option>
+            <option>10-р бүлэг</option><option>11-р бүлэг</option><option>12-р бүлэг</option>
           </select>
         </div>
       </div>
@@ -657,7 +659,6 @@
             <option>Анги дотор</option>
             <option>Хоолны газар (буфет)</option>
             <option>Ариун цэврийн өрөө</option>
-            <option>Тамхины өрөө</option>
             <option>Сургуулийн талбай</option>
             <option>Сургуулийн коридор</option>
             <option>Сургуулийн гадна</option>
@@ -721,34 +722,16 @@
 
       <div class="field">
         <label class="field-label">Хүйс <span class="opt-tag">Заавал биш</span></label>
-        <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
-          <label class="opt-item">
-            <input type="radio" name="bullyGender" value="Эрэгтэй">
-            <span class="opt-box"></span>
-            <span class="opt-label">👦 Эрэгтэй</span>
-          </label>
-          <label class="opt-item">
-            <input type="radio" name="bullyGender" value="Эмэгтэй">
-            <span class="opt-box"></span>
-            <span class="opt-label">👧 Эмэгтэй</span>
-          </label>
-          <label class="opt-item">
-            <input type="radio" name="bullyGender" value="Бүлэг">
-            <span class="opt-box"></span>
-            <span class="opt-label">👥 Бүлэг</span>
-          </label>
-          <label class="opt-item">
-            <input type="radio" name="bullyGender" value="Мэдэхгүй">
-            <span class="opt-box"></span>
-            <span class="opt-label">❓ Мэдэхгүй</span>
-          </label>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr;">
+          <label class="opt-item"><input type="radio" name="bullyGender" value="Эрэгтэй"><span class="opt-box"></span><span class="opt-label">👦 Эрэгтэй</span></label>
+          <label class="opt-item"><input type="radio" name="bullyGender" value="Эмэгтэй"><span class="opt-box"></span><span class="opt-label">👧 Эмэгтэй</span></label>
         </div>
       </div>
 
       <div class="field">
-        <label class="field-label">Нэмэлт тодорхойлолт <span class="opt-tag">Заавал биш</span></label>
+        <label class="field-label">Нэмэлт тодорхойлолт <span class="req">*</span></label>
         <p class="field-hint">Харагдах байдал, хамт байсан хүмүүс г.м — мэдэж байгаа бол бичнэ үү</p>
-        <textarea id="f_bully_todorh" placeholder="Жишээ: Ерөнхийдөө 3 хүүхэд байдаг, нэг нь цагаан малгайтай байдаг..." style="min-height:80px;"></textarea>
+        <textarea id="f_bully_todorh" placeholder="Жишээ: Ерөнхийдөө 3 хүүхэд байдаг, нэг нь цагаан малгайтай байдаг..." required style="min-height:80px;"></textarea>
       </div>
 
     </div>
@@ -1055,6 +1038,7 @@
     if (!getRadio("frequency")) { alert("Давтамж сонгоно уу!"); return false; }
     if (vSelect("f_gazar") === 0) { alert("Болсон газар сонгоно уу!"); return false; }
     if (vText("f_tailbar") === "Хоосон") { alert("Дэлгэрэнгүй тайлбар бичнэ үү!"); return false; }
+    if (vText("f_bully_todorh") === "Хоосон") { alert("Дээрэлхэгчийн нэмэлт тодорхойлолт бичнэ үү!"); return false; }
     if (!getRadio("urgent")) { alert("Яаралтай эсэхийг сонгоно уу!"); return false; }
     return true;
   }
