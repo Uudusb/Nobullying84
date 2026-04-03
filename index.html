@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Дээрэлхэлт Мэдээлэх Форм</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+Mongolian&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -297,53 +298,6 @@
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
 
-  /* ── ANONYMOUS TOGGLE ── */
-  .anon-box {
-    background: var(--purple-light);
-    border: 2px solid var(--purple);
-    border-radius: var(--radius);
-    padding: 18px 22px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .anon-icon { font-size: 32px; flex-shrink: 0; }
-  .anon-text strong { font-size: 15px; color: var(--purple); }
-  .anon-text p { font-size: 13px; color: var(--text-soft); margin-top: 3px; }
-
-  .toggle-wrap { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
-  .toggle-input { display: none; }
-  .toggle-track {
-    width: 52px; height: 28px;
-    background: var(--border);
-    border-radius: 999px;
-    position: relative;
-    cursor: pointer;
-    transition: background .2s;
-  }
-  .toggle-input:checked + .toggle-track { background: var(--purple); }
-  .toggle-thumb {
-    position: absolute;
-    top: 4px; left: 4px;
-    width: 20px; height: 20px;
-    background: #fff;
-    border-radius: 50%;
-    transition: transform .2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-  .toggle-input:checked + .toggle-track .toggle-thumb { transform: translateX(24px); }
-  .toggle-label { font-size: 13px; font-weight: 700; color: var(--purple); }
-
-  /* ── URGENT SECTION ── */
-  .urgent-section {
-    background: var(--rose-light);
-    border: 2.5px solid var(--rose);
-  }
-  .urgent-section .section-num { background: var(--rose); }
-  .urgent-section .section-header { border-bottom-color: #f5c6c6; }
-  .urgent-opt:has(input:checked) { border-color: var(--rose) !important; background: var(--rose-light) !important; }
-  .urgent-opt input:checked ~ .opt-box { background: var(--rose) !important; border-color: var(--rose) !important; }
-
   /* ── SUBMIT ── */
   .submit-area {
     background: var(--white);
@@ -377,19 +331,6 @@
   .submit-btn:active { transform: translateY(0); }
 
   /* ── SUCCESS ── */
-  .success-screen {
-    display: none;
-    max-width: 720px;
-    margin: 24px auto 0;
-    padding: 0 16px;
-  }
-  .success-card {
-    background: var(--white);
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    padding: 48px 32px;
-    text-align: center;
-  }
   .success-icon { font-size: 72px; margin-bottom: 20px; animation: bounce .5s; }
   @keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
   .success-card h2 { font-size: 24px; font-weight: 900; color: var(--teal); margin-bottom: 12px; }
@@ -398,7 +339,15 @@
   /* misc */
   .divider { height: 1.5px; background: var(--border); border-radius: 999px; }
   .anon-fields { transition: opacity .3s, max-height .3s; overflow: hidden; }
-</style>
+
+  /* SUCCESS TIMELINE */
+  .success-icon { font-size: 72px; margin-bottom: 16px; animation: pop 0.5s ease; }
+  80%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+  .success-card h2 { font-size: 26px; font-weight: 900; color: #38A89D; margin-bottom: 8px; }
+  .success-card > p { font-size: 15px; color: #718096; margin-bottom: 28px; }
+
+  .status-timeline { text-align: left; margin: 24px 0; display: flex; flex-direction: column; gap: 0; }
+  </style>
 </head>
 <body>
 
@@ -407,6 +356,14 @@
   <div class="hero-icon">🛡️</div>
   <h1>Дээрэлхэлт Мэдээлэх Форм</h1>
   <p class="hero-sub">Аюулгүй · Нууцлалтай · Таны талд байна</p>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+    <a href="track.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-family:inherit;font-size:14px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:999px;backdrop-filter:blur(8px);">
+      🔍 Мэдэгдлийн явц шалгах
+    </a>
+    <a href="admin.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-family:inherit;font-size:14px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:999px;backdrop-filter:blur(8px);">
+      🔐 Багшийн нэвтрэх хэсэг
+    </a>
+  </div>
 </div>
 
 <!-- INTRO CARD -->
@@ -414,10 +371,7 @@
   <h2>💛 Энд хандсанд баярлалаа</h2>
   <p>
     Энэ форм нь чамд аюулгүй, хэн ч мэдэхгүй газар өөрийн болон найзынхаа талаар мэдэгдэх боломжийг олгодог.
-    Чиний бичсэн мэдээлэл зөвхөн сургуулийн мэдэгдсэн багш, удирдлагад хүрнэ — өөр хэнд ч дамжихгүй.
-  </p>
-  <p>
-    Та нэрээ бичих эсвэл нууцлах эрхтэй. Аль ч тохиолдолд бид чамд тусалхыг хүсдэг. 💙
+    Чиний бичсэн мэдээлэл зөвхөн сургуулийн нийгмийн ажилтан болон удирдлагад хүрнэ, өөр хэнд ч хүргэгдэхгүй.
   </p>
   <div class="promise-row">
     <span class="promise-pill">🔒 Нууцлалтай</span>
@@ -440,22 +394,6 @@
 <!-- MAIN FORM -->
 <div id="formWrap"><form class="form-wrap" id="reportForm" onsubmit="return false;">
 
-  <!-- ── SECTION 0: ANONYMOUS TOGGLE ── -->
-  <div class="anon-box">
-    <span class="anon-icon">🎭</span>
-    <div class="anon-text">
-      <strong>Нэрээ нууцлах уу?</strong>
-      <p>Тохируулгыг асааж нэрээ хэлэхгүй байж болно.</p>
-    </div>
-    <div class="toggle-wrap">
-      <input type="checkbox" class="toggle-input" id="anonToggle" onchange="toggleAnon(this)">
-      <label class="toggle-track" for="anonToggle">
-        <span class="toggle-thumb"></span>
-      </label>
-      <span class="toggle-label">Нууцлах</span>
-    </div>
-  </div>
-
   <!-- ── SECTION 1: ТУХАЙН СУРАГЧ ── -->
   <div class="section-card">
     <div class="section-header">
@@ -467,14 +405,12 @@
     </div>
     <div class="section-body">
 
-      <div class="anon-fields" id="anonFields">
-        <div class="row2">
+      <div class="row2">
           <div class="field">
             <label class="field-label">
-              Нэр, овог
-              <span class="opt-tag">Заавал биш</span>
+              Нэр, овог <span class="req">*</span>
             </label>
-            <input type="text" id="f_ner" placeholder="Жишээ: Болд Батаа">
+            <input type="text" id="f_ner" placeholder="Жишээ: Болд Батаа" required>
           </div>
           <div class="field">
             <label class="field-label">
@@ -494,17 +430,30 @@
             </div>
           </div>
         </div>
+
+      <div class="field">
+        <label class="field-label">Ангийн түвшин <span class="req">*</span></label>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr;">
+          <label class="opt-item" id="lbl-dundangi">
+            <input type="radio" name="schoolLevel" value="dund" onchange="onLevelChange()">
+            <span class="opt-box"></span>
+            <span class="opt-emoji">📘</span>
+            <span class="opt-label">Дунд анги (6–9)</span>
+          </label>
+          <label class="opt-item" id="lbl-akhlakhangi">
+            <input type="radio" name="schoolLevel" value="akhlakh" onchange="onLevelChange()">
+            <span class="opt-box"></span>
+            <span class="opt-emoji">🎓</span>
+            <span class="opt-label">Ахлах анги (10–12)</span>
+          </label>
+        </div>
       </div>
 
-      <div class="row2">
+      <div class="row2" id="angi-buleg-row" style="display:none;">
         <div class="field">
           <label class="field-label">Анги <span class="req">*</span></label>
           <select id="f_angi" required>
             <option value="">Анги сонгох</option>
-            <option>1-р анги</option><option>2-р анги</option><option>3-р анги</option>
-            <option>4-р анги</option><option>5-р анги</option><option>6-р анги</option>
-            <option>7-р анги</option><option>8-р анги</option><option>9-р анги</option>
-            <option>10-р анги</option><option>11-р анги</option><option>12-р анги</option>
           </select>
         </div>
         <div class="field">
@@ -716,7 +665,7 @@
         </div>
         <div class="field">
           <label class="field-label">Анги, бүлэг <span class="opt-tag">Заавал биш</span></label>
-          <input type="text" id="f_bully_angi" placeholder="Жишээ: 8А эсвэл 9-р анги">
+          <input type="text" id="f_bully_angi" placeholder="Жишээ: 8-р анги, 3-р бүлэг">
         </div>
       </div>
 
@@ -737,89 +686,10 @@
     </div>
   </div>
 
-  <!-- ── SECTION 5: ЯАРАЛТАЙ ТУСЛАМЖ ── -->
-  <div class="section-card urgent-section">
-    <div class="section-header">
-      <div class="section-num">🆘</div>
-      <div>
-        <h3>Яаралтай тусламж хэрэгтэй эсэх</h3>
-        <p>Чиний аюулгүй байдал маш чухал</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="field">
-        <label class="field-label">Одоо яаралтай тусламж хэрэгтэй байна уу? <span class="req">*</span></label>
-        <div class="options-col">
-          <label class="opt-item urgent-opt">
-            <input type="radio" name="urgent" value="ЯАРАЛТАЙ — эрүүл мэнд, аюул" required>
-            <span class="opt-box"></span>
-            <span class="opt-emoji">🚨</span>
-            <span class="opt-label">Тийм — яаралтай тусламж хэрэгтэй (эрүүл мэнд, аюул)</span>
-          </label>
-          <label class="opt-item urgent-opt">
-            <input type="radio" name="urgent" value="Удахгүй тусламж хэрэгтэй">
-            <span class="opt-box"></span>
-            <span class="opt-emoji">⚡</span>
-            <span class="opt-label">Удахгүй тусламж хэрэгтэй (их санаа зовж байна)</span>
-          </label>
-          <label class="opt-item">
-            <input type="radio" name="urgent" value="Яаралтай биш, мэдэгдэж байна">
-            <span class="opt-box"></span>
-            <span class="opt-emoji">📋</span>
-            <span class="opt-label">Яаралтай биш, зүгээр л мэдэгдэж байна</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="field-label">Одоо өөрийгөө хэрхэн мэдэрч байна? <span class="opt-tag">Заавал биш</span></label>
-        <div class="options-grid">
-          <label class="opt-item">
-            <input type="checkbox" name="feeling" value="Айж байна">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">😨</span>
-            <span class="opt-label">Айж байна</span>
-          </label>
-          <label class="opt-item">
-            <input type="checkbox" name="feeling" value="Гунигтай байна">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">😢</span>
-            <span class="opt-label">Гунигтай байна</span>
-          </label>
-          <label class="opt-item">
-            <input type="checkbox" name="feeling" value="Уурлаж байна">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">😠</span>
-            <span class="opt-label">Уурлаж байна</span>
-          </label>
-          <label class="opt-item">
-            <input type="checkbox" name="feeling" value="Эргэлзэж байна">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">😕</span>
-            <span class="opt-label">Эргэлзэж байна</span>
-          </label>
-          <label class="opt-item">
-            <input type="checkbox" name="feeling" value="Хэвийн байна">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">😐</span>
-            <span class="opt-label">Хэвийн байна</span>
-          </label>
-          <label class="opt-item">
-            <input type="checkbox" name="feeling" value="Зоригтой байна">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">💪</span>
-            <span class="opt-label">Зоригтой мэдэгдэж байна</span>
-          </label>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ── SECTION 6: НЭМЭЛТ ── -->
+  <!-- ── SECTION 5: НЭМЭЛТ ── -->
   <div class="section-card">
     <div class="section-header">
-      <div class="section-num">6</div>
+      <div class="section-num">5</div>
       <div>
         <h3>Нэмэлт мэдээлэл</h3>
         <p>Бусад хэлэхийг хүссэн зүйл</p>
@@ -874,36 +744,6 @@
       </div>
 
       <div class="field">
-        <label class="field-label">Бид чамд ямар тусламж үзүүлэх вэ? <span class="opt-tag">Заавал биш</span></label>
-        <div class="options-col">
-          <label class="opt-item">
-            <input type="checkbox" name="help" value="Багш сэтгэл зүйчтэй ярилцуулах">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">🗣️</span>
-            <span class="opt-label">Багш / сэтгэл зүйчтэй ярилцуулах</span>
-          </label>
-          <label class="opt-item">
-            <input type="checkbox" name="help" value="Дээрэлхэгчтэй зохицуулалт хийх">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">🤝</span>
-            <span class="opt-label">Дээрэлхэгчтэй зохицуулалт хийх</span>
-          </label>
-          <label class="opt-item">
-            <input type="checkbox" name="help" value="Эцэг эхэд мэдэгдэх">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">👨‍👩‍👧</span>
-            <span class="opt-label">Эцэг эхэд мэдэгдэх</span>
-          </label>
-          <label class="opt-item">
-            <input type="checkbox" name="help" value="Зөвхөн бүртгэгдэх хүсэлтэй">
-            <span class="chk-box"></span>
-            <span class="opt-emoji">📋</span>
-            <span class="opt-label">Зүгээр л бүртгэгдэх хүсэлтэй, шууд арга хэмжээ хэрэггүй</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="field">
         <label class="field-label">Нэмэлт хэлэхийг хүссэн зүйл байна уу? <span class="opt-tag">Заавал биш</span></label>
         <textarea id="f_nemeltel" placeholder="Энд чөлөөтэй бичнэ үү — ямар ч зүйл хэлж болно, шүүмжлэхгүй..."></textarea>
       </div>
@@ -921,37 +761,84 @@
   </div>
 
 </form>
-
-<!-- SUCCESS SCREEN -->
-<div class="success-screen" id="successScreen">
-  <div class="success-card">
-    <div class="success-icon">🛡️</div>
-    <h2>Баярлалаа, зоригтой байсан!</h2>
-    <p>
-      Чиний мэдэгдэл амжилттай илгээгдлээ. 💙<br><br>
-      Сургуулийн эрх бүхий хүмүүс 24 цагийн дотор энэ асуудлыг хянана.<br>
-      Хэрэв яаралтай тусламж хэрэгтэй бол <strong>108</strong> эсвэл <strong>102</strong> дугаарт залга.
-    </p>
-    <div style="margin-top:24px;">
-      <button onclick="resetForm()" style="background:var(--sky-light);color:var(--sky);border:2px solid var(--sky-mid);border-radius:10px;padding:12px 28px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">
-        ← Буцах
-      </button>
     </div>
+</div>
   </div>
-
 <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0xlNX4MQwVtejTT_3KmyLSp3MUueQFVg",
+    authDomain: "school-bullying-report.firebaseapp.com",
+    projectId: "school-bullying-report",
+    storageBucket: "school-bullying-report.firebasestorage.app",
+    messagingSenderId: "644776624035",
+    appId: "1:644776624035:web:0037ea74bd6300cc622416"
+  };
+  if (!firebase.apps.length) { if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); } }
+  const db = firebase.firestore();
 
-  var EMAILJS_PUBLIC_KEY  = "eo_6wWWDxsaqQ5zWh";
-  var EMAILJS_SERVICE_ID  = "service_notblih";
-  var EMAILJS_TEMPLATE_ID = "template_rqweftd";
-  emailjs.init(EMAILJS_PUBLIC_KEY);
+  var EMAIL_AKHLAKH = "azaa.0623@gmail.com";
+  var EMAIL_DUND    = "saranbilegsaki@gmail.com";
 
-  function toggleAnon(el) {
-    var f = document.getElementById("anonFields");
-    f.style.opacity = el.checked ? "0.3" : "1";
-    f.style.pointerEvents = el.checked ? "none" : "auto";
+  // ── И-мэйл мэдэгдэл — Google Apps Script ──
+  var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbzpSnpuZtHBTxYCF7PMQRpFM7N_1y0wnSwMT-nMqKwtUScvixgCBQm8h3nGrv87D1JB/exec";
+
+  function sendNotificationEmail(payload, code) {
+    var msg = "";
+    msg += "Шинэ дээрэлхэлтийн мэдэгдэл ирлээ.\r\n";
+    msg += "================================\r\n";
+    msg += "Tracking код    : " + code + "\r\n";
+    msg += "Анги түвшин     : " + payload.schoolLevel + "\r\n";
+    msg += "Анги            : " + payload.angi + "\r\n";
+    msg += "Бүлэг           : " + payload.buleg + "\r\n";
+    msg += "Мэдэгдэгчийн нэр: " + (payload.ner || "Нууцлагдсан") + "\r\n";
+    msg += "Мэдэгдэгч       : " + (payload.medegedech || "-") + "\r\n";
+    msg += "Дээрэлхэлтийн төрөл: " + (payload.torlud || "-") + "\r\n";
+    msg += "Давтамж         : " + (payload.davtamj || "-") + "\r\n";
+    msg += "Болсон огноо    : " + (payload.ognoo || "-") + "\r\n";
+    msg += "Болсон газар    : " + (payload.gazar || "-") + "\r\n";
+    msg += "Гэрч байсан     : " + (payload.gerech || "-") + "\r\n";
+    msg += "================================\r\n";
+    msg += "Тайлбар:\r\n" + (payload.tailbar || "-") + "\r\n";
+    msg += "================================\r\n";
+    msg += "Дээрэлхэгчийн нэр  : " + (payload.bully_ner || "Мэдэгдээгүй") + "\r\n";
+    msg += "Дээрэлхэгчийн анги : " + (payload.bully_angi || "-") + "\r\n";
+    msg += "Дээрэлхэгчийн хүйс : " + (payload.bully_huiis || "-") + "\r\n";
+    msg += "Дээрэлхэгчийн тодорхойлолт:\r\n" + (payload.bully_todorh || "-") + "\r\n";
+    msg += "================================\r\n";
+    msg += "Нотлох баримт   : " + (payload.notloh || "-") + "\r\n";
+    msg += "Өмнө мэдэгдсэн  : " + (payload.omno_medegsed || "-") + "\r\n";
+    msg += "Нэмэлт тайлбар  :\r\n" + (payload.nemeltel || "-") + "\r\n";
+    msg += "================================\r\n";
+
+    fetch(NOTIFY_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        code:    code,
+        level:   payload.schoolLevel,
+        message: msg,
+        subject: "[Дээрэлхэлт] Шинэ мэдэгдэл #" + code + " — " + payload.schoolLevel
+      }),
+      headers: { "Content-Type": "text/plain;charset=utf-8" }
+    }).catch(function(err) { console.warn("Email error:", err); });
   }
 
+
+  function onLevelChange() {
+    var level = getRadio("schoolLevel");
+    var angiSel = document.getElementById("f_angi");
+    var row = document.getElementById("angi-buleg-row");
+    row.style.display = "grid";
+    angiSel.innerHTML = "<option value=\"\">" + "Анги сонгох" + "</option>";
+    var opts = level === "akhlakh"
+      ? ["10-р анги","11-р анги","12-р анги"]
+      : ["6-р анги","7-р анги","8-р анги","9-р анги"];
+    opts.forEach(function(o) {
+      var op = document.createElement("option");
+      op.text = o; op.value = o;
+      angiSel.appendChild(op);
+    });
+    angiSel.selectedIndex = 0;
+  }
   function getRadio(name) {
     var el = document.querySelector('input[name="' + name + '"]:checked');
     return el ? el.value : "";
@@ -981,16 +868,13 @@
   }
 
   function buildMsg() {
-    var anon = document.getElementById("anonToggle").checked;
     var lines = [];
     lines.push("=== ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ ===");
     lines.push("");
     lines.push("[1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ]");
-    lines.push("Нэрээ нууцалсан : " + (anon ? "Тийм" : "Үгүй"));
-    if (!anon) {
-      lines.push("Нэр, овог       : " + vText("f_ner"));
-      lines.push("Хүйс            : " + (getRadio("gender") || "Хоосон"));
-    }
+    lines.push("Нэр, овог       : " + vText("f_ner"));
+    lines.push("Хүйс            : " + (getRadio("gender") || "Хоосон"));
+    lines.push("Ангийн түвшин   : " + (getRadio("schoolLevel") === "akhlakh" ? "Ахлах анги" : "Дунд анги"));
     lines.push("Анги            : " + selText("f_angi"));
     lines.push("Бүлэг           : " + selText("f_buleg"));
     lines.push("Мэдэгдэгч       : " + (getRadio("reporter") || "Хоосон"));
@@ -1015,11 +899,7 @@
     lines.push("Нэмэлт тодорхойлолт:");
     lines.push(vText("f_bully_todorh"));
     lines.push("");
-    lines.push("[5. ЯАРАЛТАЙ ТУСЛАМЖ]");
-    lines.push("Яаралтай эсэх   : " + (getRadio("urgent") || "Хоосон"));
-    lines.push("Мэдрэмж         : " + getChecks("feeling"));
-    lines.push("");
-    lines.push("[6. НЭМЭЛТ МЭДЭЭЛЭЛ]");
+    lines.push("[5. НЭМЭЛТ МЭДЭЭЛЭЛ]");
     lines.push("Өмнө мэдэгдсэн  : " + (getRadio("prevReport") || "Хоосон"));
     lines.push("Нотлох баримт   : " + getChecks("evidence"));
     lines.push("Хэрэгтэй тусламж: " + getChecks("help"));
@@ -1032,6 +912,8 @@
   }
 
   function validate() {
+    if (vText("f_ner") === "Хоосон") { alert("Нэр, овогоо оруулна уу!"); return false; }
+    if (!getRadio("schoolLevel")) { alert("Ангийн түвшинг сонгоно уу!"); return false; }
     if (vSelect("f_angi") === 0) { alert("Анги сонгоно уу!"); return false; }
     if (vSelect("f_buleg") === 0) { alert("Бүлэг сонгоно уу!"); return false; }
     if (!getRadio("reporter")) { alert("Мэдэгдэгчийг сонгоно уу!"); return false; }
@@ -1039,7 +921,6 @@
     if (vSelect("f_gazar") === 0) { alert("Болсон газар сонгоно уу!"); return false; }
     if (vText("f_tailbar") === "Хоосон") { alert("Дэлгэрэнгүй тайлбар бичнэ үү!"); return false; }
     if (vText("f_bully_todorh") === "Хоосон") { alert("Дээрэлхэгчийн нэмэлт тодорхойлолт бичнэ үү!"); return false; }
-    if (!getRadio("urgent")) { alert("Яаралтай эсэхийг сонгоно уу!"); return false; }
     return true;
   }
 
@@ -1048,20 +929,45 @@
     var btn = document.querySelector(".submit-btn");
     btn.innerHTML = "Илгээж байна...";
     btn.disabled = true;
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      to_email: "M24MD2041@ufe.edu.mn",
-      subject: "Дээрэлхэлтийн шинэ мэдэгдэл ирлээ",
-      message: buildMsg()
-    }).then(function() {
-      document.getElementById("formWrap").style.display = "none";
-      document.getElementById("successScreen").style.display = "block";
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, function(err) {
-      console.error("EmailJS error:", JSON.stringify(err));
-      btn.innerHTML = "Мэдэгдэл илгээх";
-      btn.disabled = false;
-      alert("Алдаа гарлаа. Дахин оролдоно уу.");
-    });
+
+    var clientCode = Math.floor(100000 + Math.random() * 900000).toString();
+    var level = getRadio("schoolLevel") === "akhlakh" ? "Ахлах анги" : "Дунд анги";
+    var payload = {
+      code:          clientCode,
+      date:          new Date().toISOString(),
+      angi:          selText("f_angi"),
+      buleg:         selText("f_buleg"),
+      ner:           vText("f_ner"),
+      huiis:         getRadio("gender") || "Хоосон",
+      medegedech:    getRadio("reporter"),
+      torlud:        getChecks("type"),
+      davtamj:       getRadio("frequency"),
+      ognoo:         vText("f_ognoo"),
+      gazar:         selText("f_gazar"),
+      gerech:        getRadio("witness"),
+      tailbar:       vText("f_tailbar"),
+      bully_ner:     vText("f_bully_ner"),
+      bully_angi:    vText("f_bully_angi"),
+      bully_huiis:   getRadio("bullyGender"),
+      bully_todorh:  vText("f_bully_todorh"),
+      schoolLevel:   level,
+      omno_medegsed: getRadio("prevReport"),
+      notloh:        getChecks("evidence"),
+      nemeltel:      vText("f_nemeltel"),
+      status:        "Хянагдаж байна",
+      createdAt:     firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection("reports").doc(clientCode).set(payload)
+      .then(function() {
+        sendNotificationEmail(payload, clientCode);
+        window.location.href = "success.html?code=" + clientCode;
+      })
+      .catch(function(err) {
+        alert("Алдаа гарлаа: " + err.message);
+        btn.innerHTML = "✉️ Мэдэгдэл илгээх";
+        btn.disabled = false;
+      });
   }
 
   function resetForm() {
@@ -1069,13 +975,11 @@
     document.querySelectorAll("input[type=radio], input[type=checkbox]").forEach(function(el) { el.checked = false; });
     document.querySelectorAll("select").forEach(function(el) { el.selectedIndex = 0; });
     var og = document.getElementById("f_ognoo"); if (og) og.value = "";
-    var tog = document.getElementById("anonToggle"); if (tog) tog.checked = false;
-    toggleAnon({ checked: false });
-    document.getElementById("formWrap").style.display = "flex";
-    document.getElementById("successScreen").style.display = "none";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 </script>
+
+</body>
 
 </body>
 </html>
