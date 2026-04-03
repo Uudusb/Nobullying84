@@ -3,347 +3,769 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Багшийн Dashboard — Мэдэгдлийн удирдлага</title>
+<title>Дээрэлхэлт Мэдээлэх Форм</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+Mongolian&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Nunito",sans-serif;background:#F0F7FF;color:#2D3748;min-height:100vh}
+  :root {
+    --sky: #5BA4CF;
+    --sky-light: #EAF4FB;
+    --sky-mid: #C5E1F5;
+    --teal: #38A89D;
+    --teal-light: #E0F4F3;
+    --warm: #F7C873;
+    --warm-light: #FEF6E4;
+    --rose: #E07B7B;
+    --rose-light: #FDEAEA;
+    --green: #5CB85C;
+    --green-light: #EAF6EA;
+    --purple: #8B72BE;
+    --purple-light: #F0EBF9;
+    --text: #2D3748;
+    --text-soft: #718096;
+    --bg: #F0F7FF;
+    --white: #FFFFFF;
+    --border: #CBD5E0;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(91,164,207,0.12);
+  }
 
-/* ── LOGIN ── */
-.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#5BA4CF 0%,#38A89D 100%);padding:24px;position:relative;overflow:hidden}
-.login-page::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='2'/%3E%3C/svg%3E") repeat;pointer-events:none}
-.login-card{background:#fff;border-radius:28px;box-shadow:0 24px 80px rgba(0,0,0,.18);padding:52px 40px;max-width:440px;width:100%;text-align:center;position:relative;z-index:1}
-.login-logo{font-size:64px;margin-bottom:16px;display:block;filter:drop-shadow(0 4px 8px rgba(0,0,0,.1));animation:float 3s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.login-card h1{font-size:24px;font-weight:900;color:#2D3748;margin-bottom:6px}
-.login-card .sub{font-size:14px;color:#718096;line-height:1.6;margin-bottom:32px}
-.divider{display:flex;align-items:center;gap:12px;margin-bottom:24px}
-.divider hr{flex:1;border:none;border-top:1.5px solid #E2E8F0}
-.divider span{font-size:12px;color:#A0AEC0;font-weight:700;white-space:nowrap}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.field-wrap{text-align:left;margin-bottom:16px}
-.field-lbl{font-size:12px;font-weight:800;color:#718096;display:block;margin-bottom:6px}
-.login-input{width:100%;font-family:"Nunito",sans-serif;font-size:14px;font-weight:600;border:2px solid #E2E8F0;border-radius:12px;padding:12px 16px;outline:none;color:#2D3748;background:#F8FAFC;transition:border-color .2s}
-.login-input:focus{border-color:#5BA4CF;background:#fff}
-.login-btn{width:100%;background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:15px;font-weight:800;border:none;border-radius:14px;padding:14px;cursor:pointer;margin-bottom:16px;transition:all .2s;box-shadow:0 6px 20px rgba(91,164,207,.3)}
-.login-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(91,164,207,.4)}
-.forgot-btn{background:none;border:none;color:#5BA4CF;font-family:"Nunito",sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;padding:4px}
-.forgot-btn:hover{color:#5BA4CF}
-.login-note{margin-top:0;font-size:12px;color:#A0AEC0;line-height:1.6}
-.login-note strong{color:#718096}
-.login-err{background:#FDEAEA;border:1.5px solid #E07B7B;border-radius:12px;padding:12px 16px;margin-top:16px;font-size:13px;font-weight:700;color:#E07B7B;display:none;text-align:left}
-.login-loading{margin-top:16px;font-size:13px;color:#718096;font-weight:700;display:none}
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
 
-/* ── DASHBOARD ── */
-.dashboard{display:none}
-.topbar{background:linear-gradient(135deg,#5BA4CF 0%,#38A89D 100%);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.12);position:sticky;top:0;z-index:50}
-.topbar-left{display:flex;align-items:center;gap:14px}
-.topbar-logo{font-size:28px}
-.topbar-title h1{font-size:17px;font-weight:900;color:#fff;line-height:1.2}
-.topbar-title p{font-size:12px;color:rgba(255,255,255,.75);font-weight:600}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 14px 6px 8px}
-.user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.4)}
-.user-name{font-size:13px;font-weight:700;color:#fff;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tb-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-family:"Nunito",sans-serif;font-size:13px;font-weight:700;padding:7px 16px;border-radius:999px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-.tb-btn:hover{background:rgba(255,255,255,.25)}
-.tb-btn.red{background:rgba(224,123,123,.2);border-color:rgba(224,123,123,.4)}
-.tb-btn.green{background:rgba(29,111,66,.3);border-color:rgba(29,111,66,.5)}
+  /* ── HEADER ── */
+  .hero {
+    background: linear-gradient(135deg, #5BA4CF 0%, #38A89D 100%);
+    padding: 48px 24px 56px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='2'/%3E%3C/svg%3E") repeat;
+    pointer-events: none;
+  }
+  .hero-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .hero h1 {
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .hero-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.88);
+    font-weight: 600;
+  }
 
-.main{max-width:1140px;margin:0 auto;padding:24px 16px 60px}
+  /* ── INTRO CARD ── */
+  .intro-card {
+    max-width: 720px;
+    margin: -28px auto 0;
+    background: var(--white);
+    border-radius: 20px;
+    padding: 28px 28px 24px;
+    box-shadow: var(--shadow);
+    border-left: 6px solid var(--warm);
+    position: relative;
+    z-index: 2;
+  }
+  .intro-card h2 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .intro-card p {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--text-soft);
+  }
+  .intro-card p + p { margin-top: 8px; }
+  .promise-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .promise-pill {
+    background: var(--sky-light);
+    color: var(--sky);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1.5px solid var(--sky-mid);
+  }
 
-/* ── LEVEL TABS ── */
-.level-tabs{display:none;gap:10px;margin-bottom:22px}
-.level-tab{flex:1;background:#fff;border:2.5px solid #E2E8F0;border-radius:16px;padding:16px 20px;cursor:pointer;text-align:center;transition:all .2s;font-family:"Nunito",sans-serif}
-.level-tab:hover{border-color:#5BA4CF}
-.level-tab.active{border-color:#5BA4CF;background:linear-gradient(135deg,#EAF4FB,#E0F4F3)}
-.level-tab .tab-icon{font-size:26px;margin-bottom:6px}
-.level-tab .tab-name{font-size:15px;font-weight:900;color:#2D3748}
-.level-tab.active .tab-name{color:#5BA4CF}
-.level-tab .tab-count{font-size:12px;color:#A0AEC0;font-weight:700;margin-top:2px}
+  /* ── URGENT BANNER ── */
+  .urgent-banner {
+    max-width: 720px;
+    margin: 16px auto 0;
+    background: var(--rose-light);
+    border: 2px solid var(--rose);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .urgent-banner .icon { font-size: 28px; flex-shrink: 0; }
+  .urgent-banner strong { color: var(--rose); font-size: 15px; display: block; margin-bottom: 4px; }
+  .urgent-banner p { font-size: 13px; color: var(--text-soft); }
 
-/* ── STATS ── */
-.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px}
-.stat-card{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 2px 12px rgba(91,164,207,.08);border-top:4px solid #CBD5E0;text-align:center}
-.s-total{border-color:#5BA4CF}
-.s-pending{border-color:#F7C873}
-.s-active{border-color:#8B72BE}
-.s-done{border-color:#5CB85C}
-.s-return{border-color:#E07B7B}
-.s-closed{border-color:#A0AEC0}
-.stat-num{font-size:34px;font-weight:900;color:#2D3748;line-height:1}
-.stat-label{font-size:11px;color:#718096;font-weight:700;margin-top:5px}
+  /* ── FORM WRAPPER ── */
+  .form-wrap {
+    max-width: 720px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 
-/* ── FILTER BAR ── */
-.filter-bar{background:#fff;border-radius:14px;padding:14px 18px;box-shadow:0 2px 12px rgba(91,164,207,.08);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.filter-bar input,.filter-bar select{font-family:"Nunito",sans-serif;font-size:13px;font-weight:600;border:2px solid #E2E8F0;border-radius:10px;padding:8px 12px;outline:none;color:#2D3748;background:#F8FAFC;transition:border-color .2s}
-.filter-bar input:focus,.filter-bar select:focus{border-color:#5BA4CF;background:#fff}
-.fi-search{flex:1;min-width:200px}
-.btn-reload{background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:13px;font-weight:800;border:none;border-radius:10px;padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;margin-left:auto}
-.btn-reload:hover{transform:translateY(-1px)}
-.btn-excel{background:#1D6F42;color:#fff;font-family:"Nunito",sans-serif;font-size:13px;font-weight:800;border:none;border-radius:10px;padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
-.btn-excel:hover{background:#155534}
+  /* ── SECTION CARD ── */
+  .section-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .section-card:focus-within {
+    box-shadow: 0 6px 32px rgba(91,164,207,0.2);
+  }
+  .section-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--sky);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-header h3 { font-size: 16px; font-weight: 800; color: var(--text); }
+  .section-header p { font-size: 12px; color: var(--text-soft); margin-top: 2px; }
+  .section-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 20px; }
 
-/* ── TABLE ── */
-.table-wrap{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(91,164,207,.08);overflow:hidden}
-.table-head-bar{padding:16px 20px;border-bottom:1.5px solid #EDF2F7;display:flex;align-items:center;justify-content:space-between}
-.table-head-bar h2{font-size:15px;font-weight:800}
-.tbl-count{font-size:12px;color:#A0AEC0;font-weight:700;background:#F8FAFC;border-radius:999px;padding:4px 12px}
-.scroll-x{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
-thead th{background:#F8FAFC;padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#A0AEC0;text-transform:uppercase;letter-spacing:.8px;border-bottom:1.5px solid #EDF2F7;white-space:nowrap}
-tbody tr{border-bottom:1px solid #F7FAFC;cursor:pointer;transition:background .12s}
-tbody tr:hover{background:#EAF4FB}
-tbody tr:last-child{border-bottom:none}
-td{padding:12px 14px;vertical-align:middle}
-.td-code{font-weight:900;color:#5BA4CF;font-family:monospace;font-size:15px;letter-spacing:1px}
-.td-name{font-weight:800;color:#2D3748}
-.td-sub{font-size:11px;color:#A0AEC0;margin-top:2px}
-.td-desc{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#718096;font-size:12px}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
-.b-pending{background:#FEF6E4;color:#D97706}
-.b-active{background:#F0EBF9;color:#8B72BE}
-.b-done{background:#EAF6EA;color:#5CB85C}
-.b-return{background:#FDEAEA;color:#E07B7B}
-.b-closed{background:#F7FAFC;color:#A0AEC0;border:1px solid #E2E8F0}
-.loading-box{text-align:center;padding:64px 20px;color:#A0AEC0}
-.spinner{width:38px;height:38px;border:4px solid #E2E8F0;border-top-color:#5BA4CF;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty-box{text-align:center;padding:64px 20px}
-.empty-icon{font-size:52px;margin-bottom:12px}
-.empty-box p{font-size:14px;font-weight:700;color:#A0AEC0}
+  /* ── FIELD ── */
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .req { color: var(--rose); font-size: 13px; }
+  .opt-tag {
+    background: var(--green-light);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+  .field-hint { font-size: 12px; color: var(--text-soft); }
 
-/* ── MODAL ── */
-.pw-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
-.pw-modal-bg.open{display:flex}
-.pw-modal{background:#fff;border-radius:22px;width:100%;max-width:400px;box-shadow:0 28px 100px rgba(0,0,0,.22);animation:mPop .22s ease}
-.pw-head{padding:18px 22px;border-bottom:1.5px solid #EDF2F7;display:flex;align-items:center;justify-content:space-between;border-radius:22px 22px 0 0}
-.pw-head h3{font-size:16px;font-weight:900;color:#2D3748}
-.pw-body{padding:24px}
-.pw-field{margin-bottom:16px}
-.pw-field label{font-size:12px;font-weight:800;color:#718096;display:block;margin-bottom:6px}
-.pw-field input{width:100%;font-family:"Nunito",sans-serif;font-size:14px;font-weight:600;border:2px solid #E2E8F0;border-radius:10px;padding:11px 14px;outline:none;color:#2D3748;background:#F8FAFC;transition:border-color .2s}
-.pw-field input:focus{border-color:#5BA4CF;background:#fff}
-.pw-err{background:#FDEAEA;border:1.5px solid #E07B7B;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:#E07B7B;margin-bottom:14px;display:none}
-.pw-ok{background:#EAF6EA;border:1.5px solid #5CB85C;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:#5CB85C;margin-bottom:14px;display:none}
-.pw-btn{width:100%;background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:14px;font-weight:800;border:none;border-radius:12px;padding:13px;cursor:pointer;transition:all .2s}
-.pw-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,164,207,.3)}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
-.modal-bg.open{display:flex}
-.modal{background:#fff;border-radius:22px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;box-shadow:0 28px 100px rgba(0,0,0,.22);animation:mPop .22s ease}
-@keyframes mPop{from{transform:scale(.91);opacity:0}to{transform:scale(1);opacity:1}}
-.modal-topbar{padding:18px 22px;border-bottom:1.5px solid #EDF2F7;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;border-radius:22px 22px 0 0}
-.modal-topbar h3{font-size:16px;font-weight:900}
-.m-close{background:#F7FAFC;border:1.5px solid #E2E8F0;font-size:18px;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#718096;transition:all .15s}
-.m-close:hover{background:#EDF2F7}
-.modal-body{padding:22px}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.ii{background:#F8FAFC;border-radius:10px;padding:11px 14px}
-.ii.full{grid-column:1/-1}
-.ii label{font-size:10px;font-weight:800;color:#A0AEC0;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px}
-.ii span{font-size:13px;font-weight:700;color:#2D3748;word-break:break-word}
-.desc-area{background:#EAF4FB;border-left:4px solid #5BA4CF;border-radius:12px;padding:16px;font-size:13px;line-height:1.8;color:#2D3748;margin-bottom:18px;white-space:pre-wrap;word-break:break-word}
-.status-box{background:#F8FAFC;border-radius:14px;padding:18px;border:1.5px solid #E2E8F0}
-.status-box h4{font-size:13px;font-weight:800;color:#2D3748;margin-bottom:12px}
-.status-sel{width:100%;font-family:"Nunito",sans-serif;font-size:14px;font-weight:700;border:2px solid #E2E8F0;border-radius:10px;padding:10px 14px;color:#2D3748;background:#fff;outline:none;cursor:pointer;margin-bottom:12px;transition:border-color .2s}
-.status-sel:focus{border-color:#5BA4CF}
-.save-btn{width:100%;background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:14px;font-weight:800;border:none;border-radius:12px;padding:13px;cursor:pointer;transition:all .2s}
-.save-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,164,207,.3)}
-.save-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-</style>
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--sky);
+    background: var(--white);
+  }
+  textarea { resize: vertical; min-height: 100px; }
+
+  /* ── RADIO & CHECKBOX ── */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .options-col { display: flex; flex-direction: column; gap: 10px; }
+
+  .opt-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all .15s;
+    user-select: none;
+  }
+  .opt-item:hover { border-color: var(--sky); background: var(--sky-light); }
+  .opt-item input { display: none; }
+  .opt-item input:checked ~ .opt-box { background: var(--sky); border-color: var(--sky); }
+  .opt-item input:checked ~ .opt-box::after { opacity: 1; }
+  .opt-item:has(input:checked) { border-color: var(--sky); background: var(--sky-light); }
+
+  .opt-box {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2.5px solid var(--border);
+    background: var(--white);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+    position: relative;
+  }
+  .opt-box::after {
+    content: '';
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+
+  .chk-box {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 2.5px solid var(--border);
+    background: var(--white);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .opt-item input[type="checkbox"]:checked ~ .chk-box {
+    background: var(--teal);
+    border-color: var(--teal);
+  }
+  .opt-item input[type="checkbox"]:checked ~ .chk-box::after {
+    content: '✓';
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+  }
+  .opt-item:has(input[type="checkbox"]:checked) { border-color: var(--teal); background: var(--teal-light); }
+
+  .opt-label { font-size: 14px; font-weight: 600; }
+  .opt-emoji { font-size: 18px; }
+
+  /* row layout for grid of 2 */
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
+
+  /* ── SUBMIT ── */
+  .submit-area {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .submit-note { font-size: 13px; color: var(--text-soft); margin-bottom: 18px; }
+  .submit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--sky), var(--teal));
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 40px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(56,168,157,0.3);
+    transition: transform .15s, box-shadow .15s;
+    letter-spacing: 0.3px;
+  }
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(56,168,157,0.4);
+  }
+  .submit-btn:active { transform: translateY(0); }
+
+  /* ── SUCCESS ── */
+  .success-icon { font-size: 72px; margin-bottom: 20px; animation: bounce .5s; }
+  @keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+  .success-card h2 { font-size: 24px; font-weight: 900; color: var(--teal); margin-bottom: 12px; }
+  .success-card p { font-size: 15px; color: var(--text-soft); line-height: 1.7; }
+
+  /* misc */
+  .divider { height: 1.5px; background: var(--border); border-radius: 999px; }
+  .anon-fields { transition: opacity .3s, max-height .3s; overflow: hidden; }
+
+  /* SUCCESS TIMELINE */
+  .success-icon { font-size: 72px; margin-bottom: 16px; animation: pop 0.5s ease; }
+  80%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+  .success-card h2 { font-size: 26px; font-weight: 900; color: #38A89D; margin-bottom: 8px; }
+  .success-card > p { font-size: 15px; color: #718096; margin-bottom: 28px; }
+
+  .status-timeline { text-align: left; margin: 24px 0; display: flex; flex-direction: column; gap: 0; }
+  </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
-<div class="login-page" id="loginPage">
-  <div class="login-card">
-    <span class="login-logo">🛡️</span>
-    <h1>Багшийн систем</h1>
-    <p class="sub">Мэдэгдлийн удирдлагын хэсэг.<br>Зөвхөн эрх бүхий нийгмийн ажилтанд нээлттэй.</p>
-    <div class="field-wrap">
-      <label class="field-lbl">📧 И-мэйл хаяг</label>
-      <input type="email" id="loginEmail" class="login-input" placeholder="email@gmail.com" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
-    </div>
-    <div class="field-wrap">
-      <label class="field-lbl">🔒 Нууц үг</label>
-      <input type="password" id="loginPass" class="login-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div class="login-err" id="loginErr"></div>
-    <button class="login-btn" onclick="doLogin()">🚀 Нэвтрэх</button>
-    <button onclick="openForgotModal()" style="width:100%;background:none;border:none;color:#5BA4CF;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;padding:8px;margin-top:4px">🔑 Нууц үг мартсан уу?</button>
-    <p class="login-note">Зөвхөн <strong>зөвшөөрөгдсөн</strong> нийгмийн ажилтан нэвтэрч чадна.</p>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-icon">🛡️</div>
+  <h1>Дээрэлхэлт Мэдээлэх Форм</h1>
+  <p class="hero-sub">Аюулгүй · Нууцлалтай · Таны талд байна</p>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+    <a href="track.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-family:inherit;font-size:14px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:999px;backdrop-filter:blur(8px);">
+      🔍 Мэдэгдлийн явц шалгах
+    </a>
+    <a href="admin.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-family:inherit;font-size:14px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:999px;backdrop-filter:blur(8px);">
+      🔐 Багшийн нэвтрэх хэсэг
+    </a>
   </div>
 </div>
 
-<!-- ══ DASHBOARD ══ -->
-<div class="dashboard" id="dashPage">
-  <div class="topbar">
-    <div class="topbar-left">
-      <span class="topbar-logo">🛡️</span>
-      <div class="topbar-title">
-        <h1>Мэдэгдлийн удирдлага</h1>
-        <p id="levelLabel">—</p>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <div class="user-chip">
-        <img class="user-avatar" id="userAvatar" src="" alt="" onerror="this.style.display='none'">
-        <span class="user-name" id="userName">—</span>
-      </div>
-      <button class="tb-btn green" onclick="exportExcel()">📊 Excel</button>
-      <a href="index.html" class="tb-btn" style="text-decoration:none">📋 Форм</a>
-      <a href="track.html" class="tb-btn" style="text-decoration:none">🔍 Явц</a>
-      <button class="tb-btn" onclick="openPwModal()" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)">🔑 Нууц үг</button>
-      <button class="tb-btn red" onclick="signOut()">🚪 Гарах</button>
-    </div>
+<!-- INTRO CARD -->
+<div class="intro-card">
+  <h2>💛 Энд хандсанд баярлалаа</h2>
+  <p>
+    Энэ форм нь чамд аюулгүй, хэн ч мэдэхгүй газар өөрийн болон найзынхаа талаар мэдэгдэх боломжийг олгодог.
+    Чиний бичсэн мэдээлэл зөвхөн сургуулийн нийгмийн ажилтан болон удирдлагад хүрнэ, өөр хэнд ч хүргэгдэхгүй.
+  </p>
+  <div class="promise-row">
+    <span class="promise-pill">🔒 Нууцлалтай</span>
+    <span class="promise-pill">🧡 Шүүмжлэлгүй</span>
+    <span class="promise-pill">🏫 Сургуульд мэдэгдэнэ</span>
+    <span class="promise-pill">✅ Тусламж авах боломжтой</span>
   </div>
+</div>
 
-  <div class="main">
-    <div class="level-tabs" id="levelTabs">
-      <div class="level-tab active" id="tabAll" onclick="switchLevel('all')">
-        <div class="tab-icon">📋</div>
-        <div class="tab-name">Бүгд</div>
-        <div class="tab-count" id="cntAll">0 мэдэгдэл</div>
-      </div>
-      <div class="level-tab" id="tabDund" onclick="switchLevel('Дунд анги')">
-        <div class="tab-icon">📘</div>
-        <div class="tab-name">Дунд анги</div>
-        <div class="tab-count" id="cntDund">0 мэдэгдэл</div>
-      </div>
-      <div class="level-tab" id="tabAkhlakh" onclick="switchLevel('Ахлах анги')">
-        <div class="tab-icon">🎓</div>
-        <div class="tab-name">Ахлах анги</div>
-        <div class="tab-count" id="cntAkhlakh">0 мэдэгдэл</div>
+<!-- URGENT HOTLINE BANNER -->
+<div class="urgent-banner" style="max-width:720px;margin:16px auto 0;margin-left:auto;margin-right:auto;">
+  <span class="icon">🆘</span>
+  <div>
+    <strong>Яаралтай тусламж хэрэгтэй бол</strong>
+    <p>Шууд багш эсвэл сургуулийн нийгмийн ажилтантай холбогдоорой.<br>
+    Хүүхдийн утас: <strong>108</strong> &nbsp;|&nbsp; Цагдаа: <strong>102</strong></p>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<div id="formWrap"><form class="form-wrap" id="reportForm" onsubmit="return false;">
+
+  <!-- ── SECTION 1: ТУХАЙН СУРАГЧ ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h3>Таны мэдээлэл</h3>
+        <p>Та болон нөхцөл байдлын талаарх үндсэн мэдээлэл</p>
       </div>
     </div>
+    <div class="section-body">
 
-    <div class="stats-row">
-      <div class="stat-card s-total"><div class="stat-num" id="st0">—</div><div class="stat-label">Нийт</div></div>
-      <div class="stat-card s-pending"><div class="stat-num" id="st1">—</div><div class="stat-label">🔍 Хянагдаж байна</div></div>
-      <div class="stat-card s-active"><div class="stat-num" id="st2">—</div><div class="stat-label">⚡ Арга хэмжээ</div></div>
-      <div class="stat-card s-done"><div class="stat-num" id="st3">—</div><div class="stat-label">✅ Шийдвэрлэгдлээ</div></div>
-      <div class="stat-card s-return"><div class="stat-num" id="st4">—</div><div class="stat-label">⚠️ Буцаагдсан</div></div>
-      <div class="stat-card s-closed"><div class="stat-num" id="st5">—</div><div class="stat-label">🔒 Хаагдсан</div></div>
-    </div>
+      <div class="row2">
+          <div class="field">
+            <label class="field-label">
+              Нэр, овог <span class="req">*</span>
+            </label>
+            <input type="text" id="f_ner" placeholder="Жишээ: Болд Батаа" required>
+          </div>
+          <div class="field">
+            <label class="field-label">
+              Хүйс <span class="req">*</span>
+            </label>
+            <div class="options-grid" style="grid-template-columns:1fr 1fr;">
+              <label class="opt-item">
+                <input type="radio" name="gender" value="Эрэгтэй">
+                <span class="opt-box"></span>
+                <span class="opt-label">👦 Эрэгтэй</span>
+              </label>
+              <label class="opt-item">
+                <input type="radio" name="gender" value="Эмэгтэй">
+                <span class="opt-box"></span>
+                <span class="opt-label">👧 Эмэгтэй</span>
+              </label>
+            </div>
+          </div>
+        </div>
 
-    <div class="filter-bar">
-      <input type="text" class="fi-search" id="fi-search" placeholder="🔍 Код, нэр, тайлбараар хайх..." oninput="renderTable()">
-      <select id="fi-status" onchange="renderTable()">
-        <option value="">Бүх статус</option>
-        <option>Хянагдаж байна</option>
-        <option>Арга хэмжээ авагдаж байна</option>
-        <option>Шийдвэрлэгдлээ</option>
-        <option>Буцаагдсан — нэмэлт мэдээлэл шаардлагатай</option>
-        <option>Хаагдлаа</option>
-      </select>
-      <button class="btn-reload" onclick="loadData()">🔄 Шинэчлэх</button>
-      <button class="btn-excel" onclick="exportExcel()">📊 Excel татах</button>
-    </div>
-
-    <div class="table-wrap">
-      <div class="table-head-bar">
-        <h2>📋 Мэдэгдлийн жагсаалт</h2>
-        <span class="tbl-count" id="tblCount">—</span>
-      </div>
-      <div class="scroll-x">
-        <div class="loading-box" id="tblLoading"><div class="spinner"></div>Ачааллаж байна...</div>
-        <table id="tblMain" style="display:none">
-          <thead><tr>
-            <th>Код</th><th>Огноо</th><th>Анги / Бүлэг</th>
-            <th>Мэдэгдэгч</th><th>Дээрэлхэлтийн төрөл</th><th>Тайлбар</th><th>Статус</th>
-          </tr></thead>
-          <tbody id="tblBody"></tbody>
-        </table>
-        <div class="empty-box" id="tblEmpty" style="display:none">
-          <div class="empty-icon">📭</div><p>Мэдэгдэл олдсонгүй</p>
+      <div class="field">
+        <label class="field-label">Ангийн түвшин <span class="req">*</span></label>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr;">
+          <label class="opt-item" id="lbl-dundangi">
+            <input type="radio" name="schoolLevel" value="dund" onchange="onLevelChange()">
+            <span class="opt-box"></span>
+            <span class="opt-emoji">📘</span>
+            <span class="opt-label">Дунд анги (6–9)</span>
+          </label>
+          <label class="opt-item" id="lbl-akhlakhangi">
+            <input type="radio" name="schoolLevel" value="akhlakh" onchange="onLevelChange()">
+            <span class="opt-box"></span>
+            <span class="opt-emoji">🎓</span>
+            <span class="opt-label">Ахлах анги (10–12)</span>
+          </label>
         </div>
       </div>
+
+      <div class="row2" id="angi-buleg-row" style="display:none;">
+        <div class="field">
+          <label class="field-label">Анги <span class="req">*</span></label>
+          <select id="f_angi" required>
+            <option value="">Анги сонгох</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Бүлэг <span class="req">*</span></label>
+          <select id="f_buleg" required>
+            <option value="">Бүлэг сонгох</option>
+            <option>1-р бүлэг</option><option>2-р бүлэг</option><option>3-р бүлэг</option>
+            <option>4-р бүлэг</option><option>5-р бүлэг</option><option>6-р бүлэг</option>
+            <option>7-р бүлэг</option><option>8-р бүлэг</option><option>9-р бүлэг</option>
+            <option>10-р бүлэг</option><option>11-р бүлэг</option><option>12-р бүлэг</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Энэ мэдэгдлийг хэн мэдэгдэж байна? <span class="req">*</span></label>
+        <div class="options-col">
+          <label class="opt-item">
+            <input type="radio" name="reporter" value="Өөрөө дээрэлхэгдэж байгаа" required>
+            <span class="opt-box"></span>
+            <span class="opt-emoji">🙋</span>
+            <span class="opt-label">Өөрөө дээрэлхэгдэж байгаа</span>
+          </label>
+          <label class="opt-item">
+            <input type="radio" name="reporter" value="Найзынхаа талаар мэдэгдэж байгаа">
+            <span class="opt-box"></span>
+            <span class="opt-emoji">👫</span>
+            <span class="opt-label">Найзынхаа талаар мэдэгдэж байгаа</span>
+          </label>
+          <label class="opt-item">
+            <input type="radio" name="reporter" value="Гэрч болсон">
+            <span class="opt-box"></span>
+            <span class="opt-emoji">👀</span>
+            <span class="opt-label">Гэрч болсон</span>
+          </label>
+        </div>
+      </div>
+
     </div>
   </div>
-</div>
 
-<!-- ══ FORGOT PASSWORD MODAL ══ -->
-<div class="pw-modal-bg" id="forgotModalBg" onclick="if(event.target===this)closeForgotModal()">
-  <div class="pw-modal">
-    <div class="pw-head">
-      <h3>🔑 Нууц үг сэргээх</h3>
-      <button class="m-close" onclick="closeForgotModal()">✕</button>
-    </div>
-    <div class="pw-body">
-      <p style="font-size:13px;color:#718096;margin-bottom:16px;line-height:1.6">И-мэйл хаягаа оруулна уу. Таны бүртгэлтэй и-мэйл рүү шинэ нууц үг илгээгдэнэ.</p>
-      <div class="pw-err" id="forgotErr"></div>
-      <div class="pw-ok" id="forgotOk"></div>
-      <div class="pw-field">
-        <label>И-мэйл хаяг</label>
-        <input type="email" id="forgotEmail" placeholder="email@gmail.com">
+  <!-- ── SECTION 2: ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h3>Дээрэлхэлтийн төрөл</h3>
+        <p>Болсон зүйлийг тодорхойлоорой — нэгээс олон сонгож болно</p>
       </div>
-      <button class="pw-btn" id="forgotBtn" onclick="resetPassword()">📧 Нууц үг и-мэйлээр авах</button>
+    </div>
+    <div class="section-body">
+      <div class="options-grid">
+        <label class="opt-item">
+          <input type="checkbox" name="type" value="Хэл амаар">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">💬</span>
+          <span class="opt-label">Хэл амаар (доромжлол, дооглол)</span>
+        </label>
+        <label class="opt-item">
+          <input type="checkbox" name="type" value="Бие махбодийн">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">👊</span>
+          <span class="opt-label">Бие махбодийн (зодох, түлхэх)</span>
+        </label>
+        <label class="opt-item">
+          <input type="checkbox" name="type" value="Цахим дээрэлхэлт">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">📱</span>
+          <span class="opt-label">Цахим (онлайн доромжлол, зургийг тараах)</span>
+        </label>
+        <label class="opt-item">
+          <input type="checkbox" name="type" value="Гадуурхалт">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">🚫</span>
+          <span class="opt-label">Гадуурхалт (тоохгүй байх, хамт нааддаггүй)</span>
+        </label>
+        <label class="opt-item">
+          <input type="checkbox" name="type" value="Эд хөрөнгийн">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">🎒</span>
+          <span class="opt-label">Эд хөрөнгийн (зүйл авах, устгах)</span>
+        </label>
+        <label class="opt-item">
+          <input type="checkbox" name="type" value="Заналхийлэл">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">⚠️</span>
+          <span class="opt-label">Заналхийлэл, айлган сүрдүүлэлт</span>
+        </label>
+        <label class="opt-item">
+          <input type="checkbox" name="type" value="Үндэс гадаад төрхийн хавчлага">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">🌍</span>
+          <span class="opt-label">Үндэс, гадаад төрхийн хавчлага</span>
+        </label>
+        <label class="opt-item">
+          <input type="checkbox" name="type" value="Бусад төрөл">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">📝</span>
+          <span class="opt-label">Бусад</span>
+        </label>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Энэ ямар давтамжтай болж байна? <span class="req">*</span></label>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr;">
+          <label class="opt-item">
+            <input type="radio" name="frequency" value="Нэг удаа болсон" required>
+            <span class="opt-box"></span>
+            <span class="opt-label">Нэг удаа болсон</span>
+          </label>
+          <label class="opt-item">
+            <input type="radio" name="frequency" value="Хэд хэдэн удаа болсон">
+            <span class="opt-box"></span>
+            <span class="opt-label">Хэд хэдэн удаа болсон</span>
+          </label>
+          <label class="opt-item">
+            <input type="radio" name="frequency" value="Долоо хоног бүр болдог">
+            <span class="opt-box"></span>
+            <span class="opt-label">Долоо хоног бүр болдог</span>
+          </label>
+          <label class="opt-item">
+            <input type="radio" name="frequency" value="Өдөр бүр болдог">
+            <span class="opt-box"></span>
+            <span class="opt-label">Өдөр бүр болдог</span>
+          </label>
+        </div>
+      </div>
+
     </div>
   </div>
-</div>
 
-<!-- ══ PASSWORD MODAL ══ -->
-<div class="pw-modal-bg" id="pwModalBg" onclick="if(event.target===this)closePwModal()">
-  <div class="pw-modal">
-    <div class="pw-head">
-      <h3>🔑 Нууц үг солих</h3>
-      <button class="m-close" onclick="closePwModal()">✕</button>
+  <!-- ── SECTION 3: БОЛСОН НӨХЦӨЛ ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h3>Болсон нөхцөл байдал</h3>
+        <p>Хаана, хэзээ болсон тухай мэдээлэл</p>
+      </div>
     </div>
-    <div class="pw-body">
-      <div class="pw-err" id="pwErr"></div>
-      <div class="pw-ok" id="pwOk">✅ Нууц үг амжилттай солигдлоо!</div>
-      <div class="pw-field">
-        <label>Одоогийн нууц үг</label>
-        <input type="password" id="pwCurrent" placeholder="••••••••">
+    <div class="section-body">
+
+      <div class="row2">
+        <div class="field">
+          <label class="field-label">Болсон огноо <span class="opt-tag">Ойролцоо байж болно</span></label>
+          <input type="date" id="f_ognoo">
+        </div>
+        <div class="field">
+          <label class="field-label">Болсон газар <span class="req">*</span></label>
+          <select id="f_gazar" required>
+            <option value="">— Газар сонгох —</option>
+            <option>Анги дотор</option>
+            <option>Хоолны газар (буфет)</option>
+            <option>Ариун цэврийн өрөө</option>
+            <option>Сургуулийн талбай</option>
+            <option>Сургуулийн коридор</option>
+            <option>Сургуулийн гадна</option>
+            <option>Онлайн орчинд (интернет)</option>
+            <option>Бусад</option>
+          </select>
+        </div>
       </div>
-      <div class="pw-field">
-        <label>Шинэ нууц үг</label>
-        <input type="password" id="pwNew" placeholder="Дор хаяж 6 тэмдэгт">
+
+      <div class="field">
+        <label class="field-label">Болсон зүйлийг дэлгэрэнгүй тайлбарлаарай <span class="req">*</span></label>
+        <p class="field-hint">Чадах чинээгээрээ тодорхой бичсэн тусмаа бид тусалж чадна. Хэн ч чамайг буруутгахгүй. 💙</p>
+        <textarea id="f_tailbar" placeholder="Жишээ: ... анги дотор ... нэртэй хүүхэд надад ... гэж хэлсэн, ... хийсэн ..." required></textarea>
       </div>
-      <div class="pw-field">
-        <label>Шинэ нууц үг давтах</label>
-        <input type="password" id="pwConfirm" placeholder="Дахин оруулах">
+
+      <div class="field">
+        <label class="field-label">🧑‍🤝‍🧑 Гэрч байсан уу?</label>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <label class="opt-item">
+            <input type="radio" name="witness" value="Тийм байсан">
+            <span class="opt-box"></span>
+            <span class="opt-label">Тийм, байсан</span>
+          </label>
+          <label class="opt-item">
+            <input type="radio" name="witness" value="Байгаагүй">
+            <span class="opt-box"></span>
+            <span class="opt-label">Байгаагүй</span>
+          </label>
+          <label class="opt-item">
+            <input type="radio" name="witness" value="Мэдэхгүй">
+            <span class="opt-box"></span>
+            <span class="opt-label">Мэдэхгүй</span>
+          </label>
+        </div>
       </div>
-      <button class="pw-btn" onclick="changePassword()">🔑 Нууц үг солих</button>
-      <button class="forgot-btn" onclick="closePwModal();openForgotModal()" style="margin-top:10px">Нууц үг мартсан уу?</button>
+
     </div>
   </div>
-</div>
 
-<!-- ══ MODAL ══ -->
-<div class="modal-bg" id="modalBg" onclick="bgClose(event)">
-  <div class="modal">
-    <div class="modal-topbar">
-      <h3 id="mTitle">Мэдэгдлийн дэлгэрэнгүй</h3>
-      <button class="m-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="info-grid" id="mGrid"></div>
-      <div style="font-size:10px;font-weight:800;color:#A0AEC0;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📝 Дэлгэрэнгүй тайлбар</div>
-      <div class="desc-area" id="mDesc"></div>
-      <div class="status-box">
-        <h4>🔄 Статус өөрчлөх</h4>
-        <select class="status-sel" id="mStatusSel">
-          <option value="Хянагдаж байна">🔍 Хянагдаж байна</option>
-          <option value="Арга хэмжээ авагдаж байна">⚡ Арга хэмжээ авагдаж байна</option>
-          <option value="Шийдвэрлэгдлээ">✅ Шийдвэрлэгдлээ</option>
-          <option value="Буцаагдсан — нэмэлт мэдээлэл шаардлагатай">⚠️ Буцаагдсан — нэмэлт мэдээлэл шаардлагатай</option>
-          <option value="Хаагдлаа">🔒 Хаагдлаа</option>
-        </select>
-        <button class="save-btn" id="mSaveBtn" onclick="saveStatus()">💾 Статус хадгалах</button>
+  <!-- ── SECTION 4: ДЭЭРЭЛХЭГЧ ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h3>Дээрэлхэгчийн мэдээлэл</h3>
+        <p>Мэдэж байгаа зүйлийг л бичих хэрэгтэй — заавал биш</p>
       </div>
     </div>
-  </div>
-</div>
+    <div class="section-body">
 
+      <div class="row2">
+        <div class="field">
+          <label class="field-label">Нэр <span class="opt-tag">Заавал биш</span></label>
+          <input type="text" id="f_bully_ner" placeholder="Нэр мэдэж байвал бичнэ үү">
+        </div>
+        <div class="field">
+          <label class="field-label">Анги, бүлэг <span class="opt-tag">Заавал биш</span></label>
+          <input type="text" id="f_bully_angi" placeholder="Жишээ: 8-р анги, 3-р бүлэг">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Хүйс <span class="opt-tag">Заавал биш</span></label>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr;">
+          <label class="opt-item"><input type="radio" name="bullyGender" value="Эрэгтэй"><span class="opt-box"></span><span class="opt-label">👦 Эрэгтэй</span></label>
+          <label class="opt-item"><input type="radio" name="bullyGender" value="Эмэгтэй"><span class="opt-box"></span><span class="opt-label">👧 Эмэгтэй</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Нэмэлт тодорхойлолт <span class="req">*</span></label>
+        <p class="field-hint">Харагдах байдал, хамт байсан хүмүүс г.м — мэдэж байгаа бол бичнэ үү</p>
+        <textarea id="f_bully_todorh" placeholder="Жишээ: Ерөнхийдөө 3 хүүхэд байдаг, нэг нь цагаан малгайтай байдаг..." required style="min-height:80px;"></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: НЭМЭЛТ ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h3>Нэмэлт мэдээлэл</h3>
+        <p>Бусад хэлэхийг хүссэн зүйл</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="field">
+        <label class="field-label">Өмнө нь мэдэгдэж байсан уу?</label>
+        <div class="options-grid" style="grid-template-columns:1fr 1fr;">
+          <label class="opt-item">
+            <input type="radio" name="prevReport" value="Тийм, өмнө мэдэгдсэн">
+            <span class="opt-box"></span>
+            <span class="opt-label">Тийм, мэдэгдсэн</span>
+          </label>
+          <label class="opt-item">
+            <input type="radio" name="prevReport" value="Үгүй, анх удаа">
+            <span class="opt-box"></span>
+            <span class="opt-label">Үгүй, анх удаа</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Нотлох баримт байна уу? <span class="opt-tag">Заавал биш</span></label>
+        <div class="options-grid">
+          <label class="opt-item">
+            <input type="checkbox" name="evidence" value="Screenshot зураг">
+            <span class="chk-box"></span>
+            <span class="opt-emoji">📸</span>
+            <span class="opt-label">Зурагт дэлгэцийн хэвлэл (screenshot)</span>
+          </label>
+          <label class="opt-item">
+            <input type="checkbox" name="evidence" value="Мессеж чат">
+            <span class="chk-box"></span>
+            <span class="opt-emoji">💬</span>
+            <span class="opt-label">Мессеж, чат</span>
+          </label>
+          <label class="opt-item">
+            <input type="checkbox" name="evidence" value="Видео аудио">
+            <span class="chk-box"></span>
+            <span class="opt-emoji">🎥</span>
+            <span class="opt-label">Видео, аудио</span>
+          </label>
+          <label class="opt-item">
+            <input type="checkbox" name="evidence" value="Гэрчийн нэр бий">
+            <span class="chk-box"></span>
+            <span class="opt-emoji">🧑</span>
+            <span class="opt-label">Гэрчийн нэр бий</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Нэмэлт хэлэхийг хүссэн зүйл байна уу? <span class="opt-tag">Заавал биш</span></label>
+        <textarea id="f_nemeltel" placeholder="Энд чөлөөтэй бичнэ үү — ямар ч зүйл хэлж болно, шүүмжлэхгүй..."></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SUBMIT ── -->
+  <div class="submit-area">
+    <p class="submit-note">
+      🔒 Таны мэдэгдэл зөвхөн сургуулийн эрх бүхий багш, нийгмийн ажилтанд хүрнэ.<br>
+      Форм илгээсний дараа нэмэлт асуулт байвал чамтай холбогдож болно.
+    </p>
+    <button type="button" class="submit-btn" onclick="handleSubmit()">✉️ Мэдэгдэл илгээх</button>
+  </div>
+
+</form>
+    </div>
+</div>
+  </div>
 <script>
-// ══════════════════════════════════════════════════════════
-//  ТОХИРГОО — доорх 2 утгыг өөрийнхөөрөө солино уу
-// ══════════════════════════════════════════════════════════
-
-const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyB0xlNX4MQwVtejTT_3KmyLSp3MUueQFVg",
     authDomain: "school-bullying-report.firebaseapp.com",
     projectId: "school-bullying-report",
@@ -351,397 +773,213 @@ const firebaseConfig = {
     messagingSenderId: "644776624035",
     appId: "1:644776624035:web:0037ea74bd6300cc622416"
   };
-  if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+  if (!firebase.apps.length) { if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); } }
   const db = firebase.firestore();
 
-// Зөвшөөрөгдсөн нэвтрэлтүүд
-// нууц үгийг өөрчлөхдөө энд засна
-var ALLOWED = {
-  "uudusbayarsaikhan@gmail.com": { password: "12345678", level: "all",        role: "Ерөнхий админ" },
-  "azaa.0623@gmail.com":         { password: "12345678", level: "Ахлах анги", role: "Ахлах ангийн нийгмийн ажилтан" },
-  "saranbilegsaki@gmail.com":    { password: "12345678", level: "Дунд анги",  role: "Дунд ангийн нийгмийн ажилтан" }
-};
-// ══════════════════════════════════════════════════════════
+  var EMAIL_AKHLAKH = "azaa.0623@gmail.com";
+  var EMAIL_DUND    = "saranbilegsaki@gmail.com";
 
-var currentUser = null;
-var allData     = [];
-var currentLevel = "all";
-var activeRow   = null;
-var filteredRows = [];
+  // ── И-мэйл мэдэгдэл — Google Apps Script ──
+  var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbyZFnDMeaqzRSACfJ_l6mOTe0Dh2SVqGS8y0KxYJkSYgXvIf06Cyl-0e6i1EV0qhso5/exec";
 
-// ── Нэвтрэлт ──
-function doLogin() {
-  var email = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
-  var pass  = document.getElementById("loginPass").value || "";
-  var errEl = document.getElementById("loginErr");
-  errEl.style.display = "none";
-  if (!email || !pass) { showErr("И-мэйл болон нууц үгээ оруулна уу."); return; }
-  var perm = ALLOWED[email];
-  if (!perm) { showErr("❌ Энэ и-мэйл хаяг бүртгэлгүй байна."); return; }
+  function sendNotificationEmail(payload, code) {
+    var msg = "";
+    msg += "Шинэ дээрэлхэлтийн мэдэгдэл ирлээ.\r\n";
+    msg += "================================\r\n";
+    msg += "Tracking код    : " + code + "\r\n";
+    msg += "Анги түвшин     : " + payload.schoolLevel + "\r\n";
+    msg += "Анги            : " + payload.angi + "\r\n";
+    msg += "Бүлэг           : " + payload.buleg + "\r\n";
+    msg += "Мэдэгдэгчийн нэр: " + (payload.ner || "Нууцлагдсан") + "\r\n";
+    msg += "Мэдэгдэгч       : " + (payload.medegedech || "-") + "\r\n";
+    msg += "Дээрэлхэлтийн төрөл: " + (payload.torlud || "-") + "\r\n";
+    msg += "Давтамж         : " + (payload.davtamj || "-") + "\r\n";
+    msg += "Болсон огноо    : " + (payload.ognoo || "-") + "\r\n";
+    msg += "Болсон газар    : " + (payload.gazar || "-") + "\r\n";
+    msg += "Гэрч байсан     : " + (payload.gerech || "-") + "\r\n";
+    msg += "================================\r\n";
+    msg += "Тайлбар:\r\n" + (payload.tailbar || "-") + "\r\n";
+    msg += "================================\r\n";
+    msg += "Дээрэлхэгчийн нэр  : " + (payload.bully_ner || "Мэдэгдээгүй") + "\r\n";
+    msg += "Дээрэлхэгчийн анги : " + (payload.bully_angi || "-") + "\r\n";
+    msg += "Дээрэлхэгчийн хүйс : " + (payload.bully_huiis || "-") + "\r\n";
+    msg += "Дээрэлхэгчийн тодорхойлолт:\r\n" + (payload.bully_todorh || "-") + "\r\n";
+    msg += "================================\r\n";
+    msg += "Нотлох баримт   : " + (payload.notloh || "-") + "\r\n";
+    msg += "Өмнө мэдэгдсэн  : " + (payload.omno_medegsed || "-") + "\r\n";
+    msg += "Нэмэлт тайлбар  :\r\n" + (payload.nemeltel || "-") + "\r\n";
+    msg += "================================\r\n";
 
-  // Firebase-аас нууц үг уншиж шалгах
-  db.collection("admins").doc(email).get().then(function(doc) {
-    var storedPass = doc.exists && doc.data().password ? doc.data().password : perm.password;
-    if (storedPass !== pass) {
-      showErr("❌ И-мэйл эсвэл нууц үг буруу байна.");
-      document.getElementById("loginPass").value = "";
-      document.getElementById("loginPass").focus();
-      return;
-    }
-    currentUser = { email: email, name: email, picture: "", level: perm.level, role: perm.role };
-    enterDashboard();
-  }).catch(function() {
-    // Firebase алдаа гарвал default нууц үгээр нэвтрэх
-    if (perm.password !== pass) {
-      showErr("❌ И-мэйл эсвэл нууц үг буруу байна.");
-      document.getElementById("loginPass").value = "";
-      return;
-    }
-    currentUser = { email: email, name: email, picture: "", level: perm.level, role: perm.role };
-    enterDashboard();
-  });
-}
-
-function showErr(msg) {
-  var el = document.getElementById("loginErr");
-  el.style.display = "block";
-  el.textContent = msg;
-}
-
-// ── Нууц үг мартсан ──
-function openForgotModal() {
-  document.getElementById("forgotEmail").value = "";
-  document.getElementById("forgotErr").style.display = "none";
-  document.getElementById("forgotOk").style.display  = "none";
-  document.getElementById("forgotModalBg").classList.add("open");
-}
-function closeForgotModal() {
-  document.getElementById("forgotModalBg").classList.remove("open");
-}
-function resetPassword() {
-  var email = (document.getElementById("forgotEmail").value || "").trim().toLowerCase();
-  var errEl = document.getElementById("forgotErr");
-  var okEl  = document.getElementById("forgotOk");
-  errEl.style.display = "none";
-  okEl.style.display  = "none";
-
-  if (!email) { errEl.textContent = "И-мэйл хаягаа оруулна уу."; errEl.style.display="block"; return; }
-  if (!ALLOWED[email]) { errEl.textContent = "❌ Энэ и-мэйл хаяг бүртгэлгүй байна."; errEl.style.display="block"; return; }
-
-  var btn = document.getElementById("forgotBtn");
-  btn.disabled = true;
-  btn.textContent = "⏳ Илгээж байна...";
-
-  // Санамсаргүй шинэ нууц үг үүсгэх
-  var chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-  var newPass = "";
-  for (var i = 0; i < 8; i++) {
-    newPass += chars.charAt(Math.floor(Math.random() * chars.length));
+    fetch(NOTIFY_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        code:    code,
+        level:   payload.schoolLevel,
+        message: msg,
+        subject: "[Дээрэлхэлт] Шинэ мэдэгдэл #" + code + " — " + payload.schoolLevel
+      }),
+      headers: { "Content-Type": "text/plain;charset=utf-8" }
+    }).catch(function(err) { console.warn("Email error:", err); });
   }
 
-  // Firebase-д хадгалах
-  db.collection("admins").doc(email).set({ password: newPass }, { merge: true })
-    .then(function() {
-      ALLOWED[email].password = newPass;
 
-      // Apps Script-ээр и-мэйл явуулах
-      var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbyZFnDMeaqzRSACfJ_l6mOTe0Dh2SVqGS8y0KxYJkSYgXvIf06Cyl-0e6i1EV0qhso5/exec";
-      var msg = "Таны шинэ нууц үг: " + newPass + "\r\n\r\nНэвтэрсний дараа нууц үгээ солино уу.";
-      fetch(NOTIFY_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          code: "RESET",
-          level: ALLOWED[email] ? ALLOWED[email].level : "Дунд анги",
-          message: msg,
-          subject: "[Багшийн систем] Таны шинэ нууц үг"
-        }),
-        headers: { "Content-Type": "text/plain;charset=utf-8" }
+  function onLevelChange() {
+    var level = getRadio("schoolLevel");
+    var angiSel = document.getElementById("f_angi");
+    var row = document.getElementById("angi-buleg-row");
+    row.style.display = "grid";
+    angiSel.innerHTML = "<option value=\"\">" + "Анги сонгох" + "</option>";
+    var opts = level === "akhlakh"
+      ? ["10-р анги","11-р анги","12-р анги"]
+      : ["6-р анги","7-р анги","8-р анги","9-р анги"];
+    opts.forEach(function(o) {
+      var op = document.createElement("option");
+      op.text = o; op.value = o;
+      angiSel.appendChild(op);
+    });
+    angiSel.selectedIndex = 0;
+  }
+  function getRadio(name) {
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : "";
+  }
+
+  function getChecks(name) {
+    var els = document.querySelectorAll('input[name="' + name + '"]:checked');
+    if (!els.length) return "Хоосон";
+    var r = [];
+    for (var i = 0; i < els.length; i++) r.push(els[i].value);
+    return r.join(", ");
+  }
+
+  function vSelect(id) {
+    var el = document.getElementById(id);
+    return el ? el.selectedIndex : 0;
+  }
+
+  function selText(id) {
+    var el = document.getElementById(id);
+    return (el && el.selectedIndex > 0) ? el.options[el.selectedIndex].text : "Хоосон";
+  }
+
+  function vText(id) {
+    var el = document.getElementById(id);
+    return el ? (el.value.trim() || "Хоосон") : "Хоосон";
+  }
+
+  function buildMsg() {
+    var lines = [];
+    lines.push("=== ДЭЭРЭЛХЭЛТИЙН МЭДЭГДЭЛ ===");
+    lines.push("");
+    lines.push("[1. МЭДЭГДЭГЧИЙН МЭДЭЭЛЭЛ]");
+    lines.push("Нэр, овог       : " + vText("f_ner"));
+    lines.push("Хүйс            : " + (getRadio("gender") || "Хоосон"));
+    lines.push("Ангийн түвшин   : " + (getRadio("schoolLevel") === "akhlakh" ? "Ахлах анги" : "Дунд анги"));
+    lines.push("Анги            : " + selText("f_angi"));
+    lines.push("Бүлэг           : " + selText("f_buleg"));
+    lines.push("Мэдэгдэгч       : " + (getRadio("reporter") || "Хоосон"));
+    lines.push("");
+    lines.push("[2. ДЭЭРЭЛХЭЛТИЙН ТӨРӨЛ]");
+    lines.push("Төрлүүд         : " + getChecks("type"));
+    lines.push("Давтамж         : " + (getRadio("frequency") || "Хоосон"));
+    lines.push("");
+    lines.push("[3. БОЛСОН НӨХЦӨЛ]");
+    lines.push("Огноо           : " + vText("f_ognoo"));
+    lines.push("Газар           : " + selText("f_gazar"));
+    lines.push("Гэрч байсан     : " + (getRadio("witness") || "Хоосон"));
+    lines.push("");
+    lines.push("Дэлгэрэнгүй тайлбар:");
+    lines.push(vText("f_tailbar"));
+    lines.push("");
+    lines.push("[4. ДЭЭРЭЛХЭГЧИЙН МЭДЭЭЛЭЛ]");
+    lines.push("Нэр             : " + vText("f_bully_ner"));
+    lines.push("Анги, бүлэг     : " + vText("f_bully_angi"));
+    lines.push("Хүйс            : " + (getRadio("bullyGender") || "Хоосон"));
+    lines.push("");
+    lines.push("Нэмэлт тодорхойлолт:");
+    lines.push(vText("f_bully_todorh"));
+    lines.push("");
+    lines.push("[5. НЭМЭЛТ МЭДЭЭЛЭЛ]");
+    lines.push("Өмнө мэдэгдсэн  : " + (getRadio("prevReport") || "Хоосон"));
+    lines.push("Нотлох баримт   : " + getChecks("evidence"));
+    lines.push("Хэрэгтэй тусламж: " + getChecks("help"));
+    lines.push("");
+    lines.push("Нэмэлт тайлбар:");
+    lines.push(vText("f_nemeltel"));
+    lines.push("");
+    lines.push("================================");
+    return lines.join("\n");
+  }
+
+  function validate() {
+    if (vText("f_ner") === "Хоосон") { alert("Нэр, овогоо оруулна уу!"); return false; }
+    if (!getRadio("schoolLevel")) { alert("Ангийн түвшинг сонгоно уу!"); return false; }
+    if (vSelect("f_angi") === 0) { alert("Анги сонгоно уу!"); return false; }
+    if (vSelect("f_buleg") === 0) { alert("Бүлэг сонгоно уу!"); return false; }
+    if (!getRadio("reporter")) { alert("Мэдэгдэгчийг сонгоно уу!"); return false; }
+    if (!getRadio("frequency")) { alert("Давтамж сонгоно уу!"); return false; }
+    if (vSelect("f_gazar") === 0) { alert("Болсон газар сонгоно уу!"); return false; }
+    if (vText("f_tailbar") === "Хоосон") { alert("Дэлгэрэнгүй тайлбар бичнэ үү!"); return false; }
+    if (vText("f_bully_todorh") === "Хоосон") { alert("Дээрэлхэгчийн нэмэлт тодорхойлолт бичнэ үү!"); return false; }
+    return true;
+  }
+
+  function handleSubmit() {
+    if (!validate()) return;
+    var btn = document.querySelector(".submit-btn");
+    btn.innerHTML = "Илгээж байна...";
+    btn.disabled = true;
+
+    var clientCode = Math.floor(100000 + Math.random() * 900000).toString();
+    var level = getRadio("schoolLevel") === "akhlakh" ? "Ахлах анги" : "Дунд анги";
+    var payload = {
+      code:          clientCode,
+      date:          new Date().toISOString(),
+      angi:          selText("f_angi"),
+      buleg:         selText("f_buleg"),
+      ner:           vText("f_ner"),
+      huiis:         getRadio("gender") || "Хоосон",
+      medegedech:    getRadio("reporter"),
+      torlud:        getChecks("type"),
+      davtamj:       getRadio("frequency"),
+      ognoo:         vText("f_ognoo"),
+      gazar:         selText("f_gazar"),
+      gerech:        getRadio("witness"),
+      tailbar:       vText("f_tailbar"),
+      bully_ner:     vText("f_bully_ner"),
+      bully_angi:    vText("f_bully_angi"),
+      bully_huiis:   getRadio("bullyGender"),
+      bully_todorh:  vText("f_bully_todorh"),
+      schoolLevel:   level,
+      omno_medegsed: getRadio("prevReport"),
+      notloh:        getChecks("evidence"),
+      nemeltel:      vText("f_nemeltel"),
+      status:        "Хянагдаж байна",
+      createdAt:     firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection("reports").doc(clientCode).set(payload)
+      .then(function() {
+        sendNotificationEmail(payload, clientCode);
+        window.location.href = "success.html?code=" + clientCode;
+      })
+      .catch(function(err) {
+        alert("Алдаа гарлаа: " + err.message);
+        btn.innerHTML = "✉️ Мэдэгдэл илгээх";
+        btn.disabled = false;
       });
-
-      okEl.textContent = "✅ Шинэ нууц үг таны и-мэйл рүү илгээгдлээ!";
-      okEl.style.display = "block";
-      btn.disabled = false;
-      btn.textContent = "📧 Нууц үг и-мэйлээр авах";
-      setTimeout(closeForgotModal, 2500);
-    })
-    .catch(function(err) {
-      errEl.textContent = "Алдаа гарлаа: " + err.message;
-      errEl.style.display = "block";
-      btn.disabled = false;
-      btn.textContent = "📧 Нууц үг и-мэйлээр авах";
-    });
-}
-
-// ── Нууц үг солих ──
-function openPwModal() {
-  document.getElementById("pwCurrent").value = "";
-  document.getElementById("pwNew").value = "";
-  document.getElementById("pwConfirm").value = "";
-  document.getElementById("pwErr").style.display = "none";
-  document.getElementById("pwOk").style.display  = "none";
-  document.getElementById("pwModalBg").classList.add("open");
-}
-function closePwModal() {
-  document.getElementById("pwModalBg").classList.remove("open");
-}
-function changePassword() {
-  var cur     = document.getElementById("pwCurrent").value;
-  var nw      = document.getElementById("pwNew").value;
-  var confirm = document.getElementById("pwConfirm").value;
-  var errEl   = document.getElementById("pwErr");
-  var okEl    = document.getElementById("pwOk");
-  errEl.style.display = "none";
-  okEl.style.display  = "none";
-
-  if (!cur || !nw || !confirm) {
-    errEl.textContent = "Бүх талбарыг бөглөнө үү.";
-    errEl.style.display = "block"; return;
   }
-  // Одоогийн нууц үг шалгах
-  if (ALLOWED[currentUser.email].password !== cur) {
-    errEl.textContent = "❌ Одоогийн нууц үг буруу байна.";
-    errEl.style.display = "block"; return;
+
+  function resetForm() {
+    document.querySelectorAll("input[type=text], textarea").forEach(function(el) { el.value = ""; });
+    document.querySelectorAll("input[type=radio], input[type=checkbox]").forEach(function(el) { el.checked = false; });
+    document.querySelectorAll("select").forEach(function(el) { el.selectedIndex = 0; });
+    var og = document.getElementById("f_ognoo"); if (og) og.value = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  if (nw.length < 6) {
-    errEl.textContent = "Шинэ нууц үг дор хаяж 6 тэмдэгт байх ёстой.";
-    errEl.style.display = "block"; return;
-  }
-  if (nw !== confirm) {
-    errEl.textContent = "❌ Шинэ нууц үг таарахгүй байна.";
-    errEl.style.display = "block"; return;
-  }
-  // Firebase-д хадгалах
-  db.collection("admins").doc(currentUser.email).set({ password: nw }, { merge: true })
-    .then(function() {
-      ALLOWED[currentUser.email].password = nw;
-      okEl.style.display = "block";
-      document.getElementById("pwCurrent").value = "";
-      document.getElementById("pwNew").value = "";
-      document.getElementById("pwConfirm").value = "";
-      setTimeout(closePwModal, 1500);
-    }).catch(function(err) {
-      errEl.textContent = "Firebase алдаа: " + err.message;
-      errEl.style.display = "block";
-    });
-}
-
-function signOut() {
-  currentUser = null; allData = []; filteredRows = [];
-  document.getElementById("dashPage").style.display  = "none";
-  document.getElementById("loginPage").style.display = "flex";
-  document.getElementById("loginErr").style.display  = "none";
-  document.getElementById("loginEmail").value = "";
-  document.getElementById("loginPass").value  = "";
-}
-
-function enterDashboard() {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("dashPage").style.display  = "block";
-  document.getElementById("userName").textContent    = currentUser.name;
-  document.getElementById("levelLabel").textContent  = currentUser.role;
-  // "all" эрхтэй бол tabs харуул
-  if (currentUser.level === "all") {
-    document.getElementById("levelTabs").style.display = "flex";
-    currentLevel = "all";
-  } else {
-    currentLevel = currentUser.level;
-  }
-  loadData();
-}
-
-// ── Tab ──
-function switchLevel(lv) {
-  currentLevel = lv;
-  ["tabAll","tabDund","tabAkhlakh"].forEach(function(id) { document.getElementById(id).classList.remove("active"); });
-  var map = { all:"tabAll","Дунд анги":"tabDund","Ахлах анги":"tabAkhlakh" };
-  if (map[lv]) document.getElementById(map[lv]).classList.add("active");
-  updateStats();
-  renderTable();
-}
-
-// ── Мэдээлэл ачаалах ──
-function loadData() {
-  document.getElementById("tblLoading").style.display = "block";
-  document.getElementById("tblLoading").innerHTML = '<div class="spinner"></div>Ачааллаж байна...';
-  document.getElementById("tblMain").style.display  = "none";
-  document.getElementById("tblEmpty").style.display = "none";
-
-  var query = db.collection("reports");
-  if (currentUser.level !== "all") {
-    query = query.where("schoolLevel", "==", currentUser.level);
-  }
-  query.get()
-    .then(function(snapshot) {
-      allData = [];
-      snapshot.forEach(function(doc) {
-        var d = doc.data();
-        d.code = doc.id;
-        // date форматлах
-        if (d.createdAt && d.createdAt.toDate) {
-          var dt = d.createdAt.toDate();
-          d.date = dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0")+" "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
-        }
-        allData.push(d);
-      });
-      // Шинэ мэдэгдэл эхэнд гарах — JS-д sort хийх
-      allData.sort(function(a, b) {
-        var ta = (a.createdAt && a.createdAt.toMillis) ? a.createdAt.toMillis() : 0;
-        var tb = (b.createdAt && b.createdAt.toMillis) ? b.createdAt.toMillis() : 0;
-        return tb - ta;
-      });
-      document.getElementById("cntAll").textContent     = allData.length + " мэдэгдэл";
-      document.getElementById("cntDund").textContent    = allData.filter(function(r){return r.schoolLevel==="Дунд анги";}).length + " мэдэгдэл";
-      document.getElementById("cntAkhlakh").textContent = allData.filter(function(r){return r.schoolLevel==="Ахлах анги";}).length + " мэдэгдэл";
-      updateStats();
-      renderTable();
-      document.getElementById("tblLoading").style.display = "none";
-    })
-    .catch(function(err) {
-      document.getElementById("tblLoading").innerHTML = "⚠️ Алдаа: " + err.message;
-    });
-}
-
-// ── Статистик ──
-function updateStats() {
-  var src = visibleData();
-  var c = {p:0,a:0,d:0,r:0,cl:0};
-  src.forEach(function(row) {
-    if      (row.status==="Хянагдаж байна") c.p++;
-    else if (row.status==="Арга хэмжээ авагдаж байна") c.a++;
-    else if (row.status==="Шийдвэрлэгдлээ") c.d++;
-    else if (row.status==="Буцаагдсан — нэмэлт мэдээлэл шаардлагатай") c.r++;
-    else if (row.status==="Хаагдлаа") c.cl++;
-  });
-  document.getElementById("st0").textContent = src.length;
-  document.getElementById("st1").textContent = c.p;
-  document.getElementById("st2").textContent = c.a;
-  document.getElementById("st3").textContent = c.d;
-  document.getElementById("st4").textContent = c.r;
-  document.getElementById("st5").textContent = c.cl;
-}
-
-function visibleData() {
-  return currentLevel==="all" ? allData : allData.filter(function(r){return r.schoolLevel===currentLevel;});
-}
-
-// ── Хүснэгт render ──
-function badge(s) {
-  var m = {
-    "Хянагдаж байна":["b-pending","🔍"],
-    "Арга хэмжээ авагдаж байна":["b-active","⚡"],
-    "Шийдвэрлэгдлээ":["b-done","✅"],
-    "Буцаагдсан — нэмэлт мэдээлэл шаардлагатай":["b-return","⚠️"],
-    "Хаагдлаа":["b-closed","🔒"]
-  };
-  var v = m[s]||["b-pending","❓"];
-  return '<span class="badge '+v[0]+'">'+v[1]+" "+s+'</span>';
-}
-
-function renderTable() {
-  var q  = (document.getElementById("fi-search").value||"").toLowerCase();
-  var st = document.getElementById("fi-status").value;
-  var src = visibleData();
-  filteredRows = src.filter(function(r) {
-    var mq  = !q || [r.code,r.ner,r.tailbar,r.torlud,r.angi].join(" ").toLowerCase().includes(q);
-    var mst = !st || r.status===st;
-    return mq && mst;
-  });
-  document.getElementById("tblCount").textContent = filteredRows.length + " мэдэгдэл";
-  if (!filteredRows.length) {
-    document.getElementById("tblMain").style.display  = "none";
-    document.getElementById("tblEmpty").style.display = "block";
-    return;
-  }
-  document.getElementById("tblEmpty").style.display = "none";
-  document.getElementById("tblMain").style.display  = "table";
-  document.getElementById("tblBody").innerHTML = filteredRows.map(function(r, i) {
-    return '<tr onclick="openModal('+i+')">' +
-      '<td class="td-code">'+(r.code||"—")+'</td>'+
-      '<td><span class="td-sub">'+(r.date||"—")+'</span></td>'+
-      '<td class="td-name">'+(r.angi||"—")+' '+(r.buleg||"")+'<div class="td-sub">'+(r.schoolLevel||"")+'</div></td>'+
-      '<td class="td-name">'+(r.ner||"Нууцлагдсан")+'<div class="td-sub">'+(r.medegedech||"")+'</div></td>'+
-      '<td class="td-desc">'+(r.torlud||"—")+'</td>'+
-      '<td class="td-desc">'+(r.tailbar||"—")+'</td>'+
-      '<td>'+badge(r.status||"Хянагдаж байна")+'</td>'+
-    '</tr>';
-  }).join("");
-}
-
-// ── Modal ──
-function openModal(idx) {
-  activeRow = filteredRows[idx];
-  if (!activeRow) return;
-  document.getElementById("mTitle").textContent = "📋 Мэдэгдэл #"+(activeRow.code||"—");
-  function ii(lbl, val, full) {
-    return '<div class="ii'+(full?" full":"")+'"><label>'+lbl+'</label><span>'+(val||"—")+'</span></div>';
-  }
-  document.getElementById("mGrid").innerHTML =
-    ii("Tracking код", activeRow.code) +
-    ii("Огноо", activeRow.date) +
-    ii("Ангийн түвшин", activeRow.schoolLevel) +
-    ii("Анги, бүлэг", (activeRow.angi||"")+" "+(activeRow.buleg||"")) +
-    ii("Мэдэгдэгчийн нэр", activeRow.ner||"Нууцлагдсан") +
-    ii("Мэдэгдэгч", activeRow.medegedech) +
-    ii("Дээрэлхэлтийн төрөл", activeRow.torlud, true) +
-    ii("Дээрэлхэгчийн нэр", activeRow.bully_ner||"Мэдэгдээгүй") +
-    ii("Дээрэлхэгчийн анги", activeRow.bully_angi) +
-    ii("Болсон газар", activeRow.gazar) +
-    ii("Гэрч", activeRow.gerech) +
-    ii("Нотлох баримт", activeRow.notloh) +
-    ii("Өмнө мэдэгдсэн", activeRow.omno_medegsed) +
-    ii("Нэмэлт тайлбар", activeRow.nemeltel, true);
-  document.getElementById("mDesc").textContent = activeRow.tailbar||"—";
-  document.getElementById("mStatusSel").value  = activeRow.status||"Хянагдаж байна";
-  document.getElementById("mSaveBtn").disabled = false;
-  document.getElementById("mSaveBtn").textContent = "💾 Статус хадгалах";
-  document.getElementById("modalBg").classList.add("open");
-}
-function closeModal() { document.getElementById("modalBg").classList.remove("open"); }
-function bgClose(e)   { if (e.target===document.getElementById("modalBg")) closeModal(); }
-
-// ── Статус хадгалах ──
-function saveStatus() {
-  if (!activeRow) return;
-  var newSt = document.getElementById("mStatusSel").value;
-  var btn   = document.getElementById("mSaveBtn");
-  btn.disabled = true;
-  btn.textContent = "⏳ Хадгалж байна...";
-  db.collection("reports").doc(activeRow.code).update({ status: newSt })
-    .then(function() {
-      activeRow.status = newSt;
-      updateStats(); renderTable();
-      btn.textContent = "✅ Хадгалагдлаа!";
-      setTimeout(closeModal, 800);
-    })
-    .catch(function(err) {
-      btn.disabled = false;
-      btn.textContent = "❌ Алдаа — дахин оролд";
-    });
-}
-
-// ── Excel ──
-function exportExcel() {
-  var src = visibleData();
-  if (!src.length) { alert("Татах мэдээлэл байхгүй байна."); return; }
-  var hdrs = ["Код","Огноо","Анги түвшин","Анги","Бүлэг","Нэр","Мэдэгдэгч","Дээрэлхэлтийн төрөл","Болсон газар","Тайлбар","Дээрэлхэгчийн нэр","Нотлох баримт","Өмнө мэдэгдсэн","Нэмэлт тайлбар","Статус"];
-  var csv  = [hdrs.join(",")];
-  src.forEach(function(r){
-    csv.push([
-      r.code, r.date, r.schoolLevel, r.angi, r.buleg,
-      r.ner||"Нууцлагдсан", r.medegedech, r.torlud, r.gazar,
-      '"'+(r.tailbar||"").replace(/"/g,'""')+'"',
-      r.bully_ner, r.notloh, r.omno_medegsed,
-      '"'+(r.nemeltel||"").replace(/"/g,'""')+'"',
-      r.status
-    ].join(","));
-  });
-  var blob = new Blob(["\uFEFF"+csv.join("\n")],{type:"text/csv;charset=utf-8;"});
-  var a    = document.createElement("a");
-  a.href   = URL.createObjectURL(blob);
-  a.download = "medegdel_"+(currentLevel==="all"?"bugd":currentLevel.replace(/ /g,"_"))+"_"+new Date().toISOString().slice(0,10)+".csv";
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
 </script>
+
+</body>
+
 </body>
 </html>
