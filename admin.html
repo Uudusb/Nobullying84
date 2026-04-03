@@ -445,7 +445,7 @@ function resetPassword() {
       ALLOWED[email].password = newPass;
 
       // Apps Script-ээр и-мэйл явуулах
-      var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbzpSnpuZtHBTxYCF7PMQRpFM7N_1y0wnSwMT-nMqKwtUScvixgCBQm8h3nGrv87D1JB/exec";
+      var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbyZFnDMeaqzRSACfJ_l6mOTe0Dh2SVqGS8y0KxYJkSYgXvIf06Cyl-0e6i1EV0qhso5/exec";
       var msg = "Таны шинэ нууц үг: " + newPass + "\r\n\r\nНэвтэрсний дараа нууц үгээ солино уу.";
       fetch(NOTIFY_URL, {
         method: "POST",
