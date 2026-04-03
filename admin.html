@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Багшийн Dashboard — Мэдэгдлийн удирдлага</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Nunito",sans-serif;background:#F0F7FF;color:#2D3748;min-height:100vh}
+
+/* ── LOGIN ── */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#5BA4CF 0%,#38A89D 100%);padding:24px;position:relative;overflow:hidden}
+.login-page::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='2'/%3E%3C/svg%3E") repeat;pointer-events:none}
+.login-card{background:#fff;border-radius:28px;box-shadow:0 24px 80px rgba(0,0,0,.18);padding:52px 40px;max-width:440px;width:100%;text-align:center;position:relative;z-index:1}
+.login-logo{font-size:64px;margin-bottom:16px;display:block;filter:drop-shadow(0 4px 8px rgba(0,0,0,.1));animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.login-card h1{font-size:24px;font-weight:900;color:#2D3748;margin-bottom:6px}
+.login-card .sub{font-size:14px;color:#718096;line-height:1.6;margin-bottom:32px}
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.divider hr{flex:1;border:none;border-top:1.5px solid #E2E8F0}
+.divider span{font-size:12px;color:#A0AEC0;font-weight:700;white-space:nowrap}
+
+.field-wrap{text-align:left;margin-bottom:16px}
+.field-lbl{font-size:12px;font-weight:800;color:#718096;display:block;margin-bottom:6px}
+.login-input{width:100%;font-family:"Nunito",sans-serif;font-size:14px;font-weight:600;border:2px solid #E2E8F0;border-radius:12px;padding:12px 16px;outline:none;color:#2D3748;background:#F8FAFC;transition:border-color .2s}
+.login-input:focus{border-color:#5BA4CF;background:#fff}
+.login-btn{width:100%;background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:15px;font-weight:800;border:none;border-radius:14px;padding:14px;cursor:pointer;margin-bottom:16px;transition:all .2s;box-shadow:0 6px 20px rgba(91,164,207,.3)}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(91,164,207,.4)}
+.forgot-btn{background:none;border:none;color:#5BA4CF;font-family:"Nunito",sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;padding:4px}
+.forgot-btn:hover{color:#5BA4CF}
+.login-note{margin-top:0;font-size:12px;color:#A0AEC0;line-height:1.6}
+.login-note strong{color:#718096}
+.login-err{background:#FDEAEA;border:1.5px solid #E07B7B;border-radius:12px;padding:12px 16px;margin-top:16px;font-size:13px;font-weight:700;color:#E07B7B;display:none;text-align:left}
+.login-loading{margin-top:16px;font-size:13px;color:#718096;font-weight:700;display:none}
+
+/* ── DASHBOARD ── */
+.dashboard{display:none}
+.topbar{background:linear-gradient(135deg,#5BA4CF 0%,#38A89D 100%);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.12);position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-logo{font-size:28px}
+.topbar-title h1{font-size:17px;font-weight:900;color:#fff;line-height:1.2}
+.topbar-title p{font-size:12px;color:rgba(255,255,255,.75);font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 14px 6px 8px}
+.user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.4)}
+.user-name{font-size:13px;font-weight:700;color:#fff;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-family:"Nunito",sans-serif;font-size:13px;font-weight:700;padding:7px 16px;border-radius:999px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.tb-btn:hover{background:rgba(255,255,255,.25)}
+.tb-btn.red{background:rgba(224,123,123,.2);border-color:rgba(224,123,123,.4)}
+.tb-btn.green{background:rgba(29,111,66,.3);border-color:rgba(29,111,66,.5)}
+
+.main{max-width:1140px;margin:0 auto;padding:24px 16px 60px}
+
+/* ── LEVEL TABS ── */
+.level-tabs{display:none;gap:10px;margin-bottom:22px}
+.level-tab{flex:1;background:#fff;border:2.5px solid #E2E8F0;border-radius:16px;padding:16px 20px;cursor:pointer;text-align:center;transition:all .2s;font-family:"Nunito",sans-serif}
+.level-tab:hover{border-color:#5BA4CF}
+.level-tab.active{border-color:#5BA4CF;background:linear-gradient(135deg,#EAF4FB,#E0F4F3)}
+.level-tab .tab-icon{font-size:26px;margin-bottom:6px}
+.level-tab .tab-name{font-size:15px;font-weight:900;color:#2D3748}
+.level-tab.active .tab-name{color:#5BA4CF}
+.level-tab .tab-count{font-size:12px;color:#A0AEC0;font-weight:700;margin-top:2px}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.stat-card{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 2px 12px rgba(91,164,207,.08);border-top:4px solid #CBD5E0;text-align:center}
+.s-total{border-color:#5BA4CF}
+.s-pending{border-color:#F7C873}
+.s-active{border-color:#8B72BE}
+.s-done{border-color:#5CB85C}
+.s-return{border-color:#E07B7B}
+.s-closed{border-color:#A0AEC0}
+.stat-num{font-size:34px;font-weight:900;color:#2D3748;line-height:1}
+.stat-label{font-size:11px;color:#718096;font-weight:700;margin-top:5px}
+
+/* ── FILTER BAR ── */
+.filter-bar{background:#fff;border-radius:14px;padding:14px 18px;box-shadow:0 2px 12px rgba(91,164,207,.08);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.filter-bar input,.filter-bar select{font-family:"Nunito",sans-serif;font-size:13px;font-weight:600;border:2px solid #E2E8F0;border-radius:10px;padding:8px 12px;outline:none;color:#2D3748;background:#F8FAFC;transition:border-color .2s}
+.filter-bar input:focus,.filter-bar select:focus{border-color:#5BA4CF;background:#fff}
+.fi-search{flex:1;min-width:200px}
+.btn-reload{background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:13px;font-weight:800;border:none;border-radius:10px;padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;margin-left:auto}
+.btn-reload:hover{transform:translateY(-1px)}
+.btn-excel{background:#1D6F42;color:#fff;font-family:"Nunito",sans-serif;font-size:13px;font-weight:800;border:none;border-radius:10px;padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-excel:hover{background:#155534}
+
+/* ── TABLE ── */
+.table-wrap{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(91,164,207,.08);overflow:hidden}
+.table-head-bar{padding:16px 20px;border-bottom:1.5px solid #EDF2F7;display:flex;align-items:center;justify-content:space-between}
+.table-head-bar h2{font-size:15px;font-weight:800}
+.tbl-count{font-size:12px;color:#A0AEC0;font-weight:700;background:#F8FAFC;border-radius:999px;padding:4px 12px}
+.scroll-x{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
+thead th{background:#F8FAFC;padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#A0AEC0;text-transform:uppercase;letter-spacing:.8px;border-bottom:1.5px solid #EDF2F7;white-space:nowrap}
+tbody tr{border-bottom:1px solid #F7FAFC;cursor:pointer;transition:background .12s}
+tbody tr:hover{background:#EAF4FB}
+tbody tr:last-child{border-bottom:none}
+td{padding:12px 14px;vertical-align:middle}
+.td-code{font-weight:900;color:#5BA4CF;font-family:monospace;font-size:15px;letter-spacing:1px}
+.td-name{font-weight:800;color:#2D3748}
+.td-sub{font-size:11px;color:#A0AEC0;margin-top:2px}
+.td-desc{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#718096;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
+.b-pending{background:#FEF6E4;color:#D97706}
+.b-active{background:#F0EBF9;color:#8B72BE}
+.b-done{background:#EAF6EA;color:#5CB85C}
+.b-return{background:#FDEAEA;color:#E07B7B}
+.b-closed{background:#F7FAFC;color:#A0AEC0;border:1px solid #E2E8F0}
+.loading-box{text-align:center;padding:64px 20px;color:#A0AEC0}
+.spinner{width:38px;height:38px;border:4px solid #E2E8F0;border-top-color:#5BA4CF;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-box{text-align:center;padding:64px 20px}
+.empty-icon{font-size:52px;margin-bottom:12px}
+.empty-box p{font-size:14px;font-weight:700;color:#A0AEC0}
+
+/* ── MODAL ── */
+.pw-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.pw-modal-bg.open{display:flex}
+.pw-modal{background:#fff;border-radius:22px;width:100%;max-width:400px;box-shadow:0 28px 100px rgba(0,0,0,.22);animation:mPop .22s ease}
+.pw-head{padding:18px 22px;border-bottom:1.5px solid #EDF2F7;display:flex;align-items:center;justify-content:space-between;border-radius:22px 22px 0 0}
+.pw-head h3{font-size:16px;font-weight:900;color:#2D3748}
+.pw-body{padding:24px}
+.pw-field{margin-bottom:16px}
+.pw-field label{font-size:12px;font-weight:800;color:#718096;display:block;margin-bottom:6px}
+.pw-field input{width:100%;font-family:"Nunito",sans-serif;font-size:14px;font-weight:600;border:2px solid #E2E8F0;border-radius:10px;padding:11px 14px;outline:none;color:#2D3748;background:#F8FAFC;transition:border-color .2s}
+.pw-field input:focus{border-color:#5BA4CF;background:#fff}
+.pw-err{background:#FDEAEA;border:1.5px solid #E07B7B;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:#E07B7B;margin-bottom:14px;display:none}
+.pw-ok{background:#EAF6EA;border:1.5px solid #5CB85C;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:#5CB85C;margin-bottom:14px;display:none}
+.pw-btn{width:100%;background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:14px;font-weight:800;border:none;border-radius:12px;padding:13px;cursor:pointer;transition:all .2s}
+.pw-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,164,207,.3)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:22px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;box-shadow:0 28px 100px rgba(0,0,0,.22);animation:mPop .22s ease}
+@keyframes mPop{from{transform:scale(.91);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-topbar{padding:18px 22px;border-bottom:1.5px solid #EDF2F7;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;border-radius:22px 22px 0 0}
+.modal-topbar h3{font-size:16px;font-weight:900}
+.m-close{background:#F7FAFC;border:1.5px solid #E2E8F0;font-size:18px;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#718096;transition:all .15s}
+.m-close:hover{background:#EDF2F7}
+.modal-body{padding:22px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.ii{background:#F8FAFC;border-radius:10px;padding:11px 14px}
+.ii.full{grid-column:1/-1}
+.ii label{font-size:10px;font-weight:800;color:#A0AEC0;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px}
+.ii span{font-size:13px;font-weight:700;color:#2D3748;word-break:break-word}
+.desc-area{background:#EAF4FB;border-left:4px solid #5BA4CF;border-radius:12px;padding:16px;font-size:13px;line-height:1.8;color:#2D3748;margin-bottom:18px;white-space:pre-wrap;word-break:break-word}
+.status-box{background:#F8FAFC;border-radius:14px;padding:18px;border:1.5px solid #E2E8F0}
+.status-box h4{font-size:13px;font-weight:800;color:#2D3748;margin-bottom:12px}
+.status-sel{width:100%;font-family:"Nunito",sans-serif;font-size:14px;font-weight:700;border:2px solid #E2E8F0;border-radius:10px;padding:10px 14px;color:#2D3748;background:#fff;outline:none;cursor:pointer;margin-bottom:12px;transition:border-color .2s}
+.status-sel:focus{border-color:#5BA4CF}
+.save-btn{width:100%;background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:14px;font-weight:800;border:none;border-radius:12px;padding:13px;cursor:pointer;transition:all .2s}
+.save-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,164,207,.3)}
+.save-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <span class="login-logo">🛡️</span>
+    <h1>Багшийн систем</h1>
+    <p class="sub">Мэдэгдлийн удирдлагын хэсэг.<br>Зөвхөн эрх бүхий нийгмийн ажилтанд нээлттэй.</p>
+    <div class="field-wrap">
+      <label class="field-lbl">📧 И-мэйл хаяг</label>
+      <input type="email" id="loginEmail" class="login-input" placeholder="email@gmail.com" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    </div>
+    <div class="field-wrap">
+      <label class="field-lbl">🔒 Нууц үг</label>
+      <input type="password" id="loginPass" class="login-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-err" id="loginErr"></div>
+    <button class="login-btn" onclick="doLogin()">🚀 Нэвтрэх</button>
+    <button onclick="openForgotModal()" style="width:100%;background:none;border:none;color:#5BA4CF;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;padding:8px;margin-top:4px">🔑 Нууц үг мартсан уу?</button>
+    <p class="login-note">Зөвхөн <strong>зөвшөөрөгдсөн</strong> нийгмийн ажилтан нэвтэрч чадна.</p>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="dashboard" id="dashPage">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">🛡️</span>
+      <div class="topbar-title">
+        <h1>Мэдэгдлийн удирдлага</h1>
+        <p id="levelLabel">—</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <img class="user-avatar" id="userAvatar" src="" alt="" onerror="this.style.display='none'">
+        <span class="user-name" id="userName">—</span>
+      </div>
+      <button class="tb-btn green" onclick="exportExcel()">📊 Excel</button>
+      <a href="index.html" class="tb-btn" style="text-decoration:none">📋 Форм</a>
+      <a href="track.html" class="tb-btn" style="text-decoration:none">🔍 Явц</a>
+      <button class="tb-btn" onclick="openPwModal()" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)">🔑 Нууц үг</button>
+      <button class="tb-btn red" onclick="signOut()">🚪 Гарах</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="level-tabs" id="levelTabs">
+      <div class="level-tab active" id="tabAll" onclick="switchLevel('all')">
+        <div class="tab-icon">📋</div>
+        <div class="tab-name">Бүгд</div>
+        <div class="tab-count" id="cntAll">0 мэдэгдэл</div>
+      </div>
+      <div class="level-tab" id="tabDund" onclick="switchLevel('Дунд анги')">
+        <div class="tab-icon">📘</div>
+        <div class="tab-name">Дунд анги</div>
+        <div class="tab-count" id="cntDund">0 мэдэгдэл</div>
+      </div>
+      <div class="level-tab" id="tabAkhlakh" onclick="switchLevel('Ахлах анги')">
+        <div class="tab-icon">🎓</div>
+        <div class="tab-name">Ахлах анги</div>
+        <div class="tab-count" id="cntAkhlakh">0 мэдэгдэл</div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card s-total"><div class="stat-num" id="st0">—</div><div class="stat-label">Нийт</div></div>
+      <div class="stat-card s-pending"><div class="stat-num" id="st1">—</div><div class="stat-label">🔍 Хянагдаж байна</div></div>
+      <div class="stat-card s-active"><div class="stat-num" id="st2">—</div><div class="stat-label">⚡ Арга хэмжээ</div></div>
+      <div class="stat-card s-done"><div class="stat-num" id="st3">—</div><div class="stat-label">✅ Шийдвэрлэгдлээ</div></div>
+      <div class="stat-card s-return"><div class="stat-num" id="st4">—</div><div class="stat-label">⚠️ Буцаагдсан</div></div>
+      <div class="stat-card s-closed"><div class="stat-num" id="st5">—</div><div class="stat-label">🔒 Хаагдсан</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" class="fi-search" id="fi-search" placeholder="🔍 Код, нэр, тайлбараар хайх..." oninput="renderTable()">
+      <select id="fi-status" onchange="renderTable()">
+        <option value="">Бүх статус</option>
+        <option>Хянагдаж байна</option>
+        <option>Арга хэмжээ авагдаж байна</option>
+        <option>Шийдвэрлэгдлээ</option>
+        <option>Буцаагдсан — нэмэлт мэдээлэл шаардлагатай</option>
+        <option>Хаагдлаа</option>
+      </select>
+      <button class="btn-reload" onclick="loadData()">🔄 Шинэчлэх</button>
+      <button class="btn-excel" onclick="exportExcel()">📊 Excel татах</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-head-bar">
+        <h2>📋 Мэдэгдлийн жагсаалт</h2>
+        <span class="tbl-count" id="tblCount">—</span>
+      </div>
+      <div class="scroll-x">
+        <div class="loading-box" id="tblLoading"><div class="spinner"></div>Ачааллаж байна...</div>
+        <table id="tblMain" style="display:none">
+          <thead><tr>
+            <th>Код</th><th>Огноо</th><th>Анги / Бүлэг</th>
+            <th>Мэдэгдэгч</th><th>Дээрэлхэлтийн төрөл</th><th>Тайлбар</th><th>Статус</th>
+          </tr></thead>
+          <tbody id="tblBody"></tbody>
+        </table>
+        <div class="empty-box" id="tblEmpty" style="display:none">
+          <div class="empty-icon">📭</div><p>Мэдэгдэл олдсонгүй</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FORGOT PASSWORD MODAL ══ -->
+<div class="pw-modal-bg" id="forgotModalBg" onclick="if(event.target===this)closeForgotModal()">
+  <div class="pw-modal">
+    <div class="pw-head">
+      <h3>🔑 Нууц үг сэргээх</h3>
+      <button class="m-close" onclick="closeForgotModal()">✕</button>
+    </div>
+    <div class="pw-body">
+      <p style="font-size:13px;color:#718096;margin-bottom:16px;line-height:1.6">И-мэйл хаягаа оруулна уу. Таны бүртгэлтэй и-мэйл рүү шинэ нууц үг илгээгдэнэ.</p>
+      <div class="pw-err" id="forgotErr"></div>
+      <div class="pw-ok" id="forgotOk"></div>
+      <div class="pw-field">
+        <label>И-мэйл хаяг</label>
+        <input type="email" id="forgotEmail" placeholder="email@gmail.com">
+      </div>
+      <button class="pw-btn" id="forgotBtn" onclick="resetPassword()">📧 Нууц үг и-мэйлээр авах</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PASSWORD MODAL ══ -->
+<div class="pw-modal-bg" id="pwModalBg" onclick="if(event.target===this)closePwModal()">
+  <div class="pw-modal">
+    <div class="pw-head">
+      <h3>🔑 Нууц үг солих</h3>
+      <button class="m-close" onclick="closePwModal()">✕</button>
+    </div>
+    <div class="pw-body">
+      <div class="pw-err" id="pwErr"></div>
+      <div class="pw-ok" id="pwOk">✅ Нууц үг амжилттай солигдлоо!</div>
+      <div class="pw-field">
+        <label>Одоогийн нууц үг</label>
+        <input type="password" id="pwCurrent" placeholder="••••••••">
+      </div>
+      <div class="pw-field">
+        <label>Шинэ нууц үг</label>
+        <input type="password" id="pwNew" placeholder="Дор хаяж 6 тэмдэгт">
+      </div>
+      <div class="pw-field">
+        <label>Шинэ нууц үг давтах</label>
+        <input type="password" id="pwConfirm" placeholder="Дахин оруулах">
+      </div>
+      <button class="pw-btn" onclick="changePassword()">🔑 Нууц үг солих</button>
+      <button class="forgot-btn" onclick="closePwModal();openForgotModal()" style="margin-top:10px">Нууц үг мартсан уу?</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div class="modal-bg" id="modalBg" onclick="bgClose(event)">
+  <div class="modal">
+    <div class="modal-topbar">
+      <h3 id="mTitle">Мэдэгдлийн дэлгэрэнгүй</h3>
+      <button class="m-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid" id="mGrid"></div>
+      <div style="font-size:10px;font-weight:800;color:#A0AEC0;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📝 Дэлгэрэнгүй тайлбар</div>
+      <div class="desc-area" id="mDesc"></div>
+      <div class="status-box">
+        <h4>🔄 Статус өөрчлөх</h4>
+        <select class="status-sel" id="mStatusSel">
+          <option value="Хянагдаж байна">🔍 Хянагдаж байна</option>
+          <option value="Арга хэмжээ авагдаж байна">⚡ Арга хэмжээ авагдаж байна</option>
+          <option value="Шийдвэрлэгдлээ">✅ Шийдвэрлэгдлээ</option>
+          <option value="Буцаагдсан — нэмэлт мэдээлэл шаардлагатай">⚠️ Буцаагдсан — нэмэлт мэдээлэл шаардлагатай</option>
+          <option value="Хаагдлаа">🔒 Хаагдлаа</option>
+        </select>
+        <button class="save-btn" id="mSaveBtn" onclick="saveStatus()">💾 Статус хадгалах</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  ТОХИРГОО — доорх 2 утгыг өөрийнхөөрөө солино уу
+// ══════════════════════════════════════════════════════════
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB0xlNX4MQwVtejTT_3KmyLSp3MUueQFVg",
+    authDomain: "school-bullying-report.firebaseapp.com",
+    projectId: "school-bullying-report",
+    storageBucket: "school-bullying-report.firebasestorage.app",
+    messagingSenderId: "644776624035",
+    appId: "1:644776624035:web:0037ea74bd6300cc622416"
+  };
+  if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+  const db = firebase.firestore();
+
+// Зөвшөөрөгдсөн нэвтрэлтүүд
+// нууц үгийг өөрчлөхдөө энд засна
+var ALLOWED = {
+  "uudusbayarsaikhan@gmail.com": { password: "12345678", level: "all",        role: "Ерөнхий админ" },
+  "azaa.0623@gmail.com":         { password: "12345678", level: "Ахлах анги", role: "Ахлах ангийн нийгмийн ажилтан" },
+  "saranbilegsaki@gmail.com":    { password: "12345678", level: "Дунд анги",  role: "Дунд ангийн нийгмийн ажилтан" }
+};
+// ══════════════════════════════════════════════════════════
+
+var currentUser = null;
+var allData     = [];
+var currentLevel = "all";
+var activeRow   = null;
+var filteredRows = [];
+
+// ── Нэвтрэлт ──
+function doLogin() {
+  var email = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
+  var pass  = document.getElementById("loginPass").value || "";
+  var errEl = document.getElementById("loginErr");
+  errEl.style.display = "none";
+  if (!email || !pass) { showErr("И-мэйл болон нууц үгээ оруулна уу."); return; }
+  var perm = ALLOWED[email];
+  if (!perm) { showErr("❌ Энэ и-мэйл хаяг бүртгэлгүй байна."); return; }
+
+  // Firebase-аас нууц үг уншиж шалгах
+  db.collection("admins").doc(email).get().then(function(doc) {
+    var storedPass = doc.exists && doc.data().password ? doc.data().password : perm.password;
+    if (storedPass !== pass) {
+      showErr("❌ И-мэйл эсвэл нууц үг буруу байна.");
+      document.getElementById("loginPass").value = "";
+      document.getElementById("loginPass").focus();
+      return;
+    }
+    currentUser = { email: email, name: email, picture: "", level: perm.level, role: perm.role };
+    enterDashboard();
+  }).catch(function() {
+    // Firebase алдаа гарвал default нууц үгээр нэвтрэх
+    if (perm.password !== pass) {
+      showErr("❌ И-мэйл эсвэл нууц үг буруу байна.");
+      document.getElementById("loginPass").value = "";
+      return;
+    }
+    currentUser = { email: email, name: email, picture: "", level: perm.level, role: perm.role };
+    enterDashboard();
+  });
+}
+
+function showErr(msg) {
+  var el = document.getElementById("loginErr");
+  el.style.display = "block";
+  el.textContent = msg;
+}
+
+// ── Нууц үг мартсан ──
+function openForgotModal() {
+  document.getElementById("forgotEmail").value = "";
+  document.getElementById("forgotErr").style.display = "none";
+  document.getElementById("forgotOk").style.display  = "none";
+  document.getElementById("forgotModalBg").classList.add("open");
+}
+function closeForgotModal() {
+  document.getElementById("forgotModalBg").classList.remove("open");
+}
+function resetPassword() {
+  var email = (document.getElementById("forgotEmail").value || "").trim().toLowerCase();
+  var errEl = document.getElementById("forgotErr");
+  var okEl  = document.getElementById("forgotOk");
+  errEl.style.display = "none";
+  okEl.style.display  = "none";
+
+  if (!email) { errEl.textContent = "И-мэйл хаягаа оруулна уу."; errEl.style.display="block"; return; }
+  if (!ALLOWED[email]) { errEl.textContent = "❌ Энэ и-мэйл хаяг бүртгэлгүй байна."; errEl.style.display="block"; return; }
+
+  var btn = document.getElementById("forgotBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Илгээж байна...";
+
+  // Санамсаргүй шинэ нууц үг үүсгэх
+  var chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  var newPass = "";
+  for (var i = 0; i < 8; i++) {
+    newPass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  // Firebase-д хадгалах
+  db.collection("admins").doc(email).set({ password: newPass }, { merge: true })
+    .then(function() {
+      ALLOWED[email].password = newPass;
+
+      // Apps Script-ээр и-мэйл явуулах
+      var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbzpSnpuZtHBTxYCF7PMQRpFM7N_1y0wnSwMT-nMqKwtUScvixgCBQm8h3nGrv87D1JB/exec";
+      var msg = "Таны шинэ нууц үг: " + newPass + "\r\n\r\nНэвтэрсний дараа нууц үгээ солино уу.";
+      fetch(NOTIFY_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          code: "RESET",
+          level: ALLOWED[email] ? ALLOWED[email].level : "Дунд анги",
+          message: msg,
+          subject: "[Багшийн систем] Таны шинэ нууц үг"
+        }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" }
+      });
+
+      okEl.textContent = "✅ Шинэ нууц үг таны и-мэйл рүү илгээгдлээ!";
+      okEl.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "📧 Нууц үг и-мэйлээр авах";
+      setTimeout(closeForgotModal, 2500);
+    })
+    .catch(function(err) {
+      errEl.textContent = "Алдаа гарлаа: " + err.message;
+      errEl.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "📧 Нууц үг и-мэйлээр авах";
+    });
+}
+
+// ── Нууц үг солих ──
+function openPwModal() {
+  document.getElementById("pwCurrent").value = "";
+  document.getElementById("pwNew").value = "";
+  document.getElementById("pwConfirm").value = "";
+  document.getElementById("pwErr").style.display = "none";
+  document.getElementById("pwOk").style.display  = "none";
+  document.getElementById("pwModalBg").classList.add("open");
+}
+function closePwModal() {
+  document.getElementById("pwModalBg").classList.remove("open");
+}
+function changePassword() {
+  var cur     = document.getElementById("pwCurrent").value;
+  var nw      = document.getElementById("pwNew").value;
+  var confirm = document.getElementById("pwConfirm").value;
+  var errEl   = document.getElementById("pwErr");
+  var okEl    = document.getElementById("pwOk");
+  errEl.style.display = "none";
+  okEl.style.display  = "none";
+
+  if (!cur || !nw || !confirm) {
+    errEl.textContent = "Бүх талбарыг бөглөнө үү.";
+    errEl.style.display = "block"; return;
+  }
+  // Одоогийн нууц үг шалгах
+  if (ALLOWED[currentUser.email].password !== cur) {
+    errEl.textContent = "❌ Одоогийн нууц үг буруу байна.";
+    errEl.style.display = "block"; return;
+  }
+  if (nw.length < 6) {
+    errEl.textContent = "Шинэ нууц үг дор хаяж 6 тэмдэгт байх ёстой.";
+    errEl.style.display = "block"; return;
+  }
+  if (nw !== confirm) {
+    errEl.textContent = "❌ Шинэ нууц үг таарахгүй байна.";
+    errEl.style.display = "block"; return;
+  }
+  // Firebase-д хадгалах
+  db.collection("admins").doc(currentUser.email).set({ password: nw }, { merge: true })
+    .then(function() {
+      ALLOWED[currentUser.email].password = nw;
+      okEl.style.display = "block";
+      document.getElementById("pwCurrent").value = "";
+      document.getElementById("pwNew").value = "";
+      document.getElementById("pwConfirm").value = "";
+      setTimeout(closePwModal, 1500);
+    }).catch(function(err) {
+      errEl.textContent = "Firebase алдаа: " + err.message;
+      errEl.style.display = "block";
+    });
+}
+
+function signOut() {
+  currentUser = null; allData = []; filteredRows = [];
+  document.getElementById("dashPage").style.display  = "none";
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("loginErr").style.display  = "none";
+  document.getElementById("loginEmail").value = "";
+  document.getElementById("loginPass").value  = "";
+}
+
+function enterDashboard() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("dashPage").style.display  = "block";
+  document.getElementById("userName").textContent    = currentUser.name;
+  document.getElementById("levelLabel").textContent  = currentUser.role;
+  // "all" эрхтэй бол tabs харуул
+  if (currentUser.level === "all") {
+    document.getElementById("levelTabs").style.display = "flex";
+    currentLevel = "all";
+  } else {
+    currentLevel = currentUser.level;
+  }
+  loadData();
+}
+
+// ── Tab ──
+function switchLevel(lv) {
+  currentLevel = lv;
+  ["tabAll","tabDund","tabAkhlakh"].forEach(function(id) { document.getElementById(id).classList.remove("active"); });
+  var map = { all:"tabAll","Дунд анги":"tabDund","Ахлах анги":"tabAkhlakh" };
+  if (map[lv]) document.getElementById(map[lv]).classList.add("active");
+  updateStats();
+  renderTable();
+}
+
+// ── Мэдээлэл ачаалах ──
+function loadData() {
+  document.getElementById("tblLoading").style.display = "block";
+  document.getElementById("tblLoading").innerHTML = '<div class="spinner"></div>Ачааллаж байна...';
+  document.getElementById("tblMain").style.display  = "none";
+  document.getElementById("tblEmpty").style.display = "none";
+
+  var query = db.collection("reports");
+  if (currentUser.level !== "all") {
+    query = query.where("schoolLevel", "==", currentUser.level);
+  }
+  query.get()
+    .then(function(snapshot) {
+      allData = [];
+      snapshot.forEach(function(doc) {
+        var d = doc.data();
+        d.code = doc.id;
+        // date форматлах
+        if (d.createdAt && d.createdAt.toDate) {
+          var dt = d.createdAt.toDate();
+          d.date = dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0")+" "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
+        }
+        allData.push(d);
+      });
+      // Шинэ мэдэгдэл эхэнд гарах — JS-д sort хийх
+      allData.sort(function(a, b) {
+        var ta = (a.createdAt && a.createdAt.toMillis) ? a.createdAt.toMillis() : 0;
+        var tb = (b.createdAt && b.createdAt.toMillis) ? b.createdAt.toMillis() : 0;
+        return tb - ta;
+      });
+      document.getElementById("cntAll").textContent     = allData.length + " мэдэгдэл";
+      document.getElementById("cntDund").textContent    = allData.filter(function(r){return r.schoolLevel==="Дунд анги";}).length + " мэдэгдэл";
+      document.getElementById("cntAkhlakh").textContent = allData.filter(function(r){return r.schoolLevel==="Ахлах анги";}).length + " мэдэгдэл";
+      updateStats();
+      renderTable();
+      document.getElementById("tblLoading").style.display = "none";
+    })
+    .catch(function(err) {
+      document.getElementById("tblLoading").innerHTML = "⚠️ Алдаа: " + err.message;
+    });
+}
+
+// ── Статистик ──
+function updateStats() {
+  var src = visibleData();
+  var c = {p:0,a:0,d:0,r:0,cl:0};
+  src.forEach(function(row) {
+    if      (row.status==="Хянагдаж байна") c.p++;
+    else if (row.status==="Арга хэмжээ авагдаж байна") c.a++;
+    else if (row.status==="Шийдвэрлэгдлээ") c.d++;
+    else if (row.status==="Буцаагдсан — нэмэлт мэдээлэл шаардлагатай") c.r++;
+    else if (row.status==="Хаагдлаа") c.cl++;
+  });
+  document.getElementById("st0").textContent = src.length;
+  document.getElementById("st1").textContent = c.p;
+  document.getElementById("st2").textContent = c.a;
+  document.getElementById("st3").textContent = c.d;
+  document.getElementById("st4").textContent = c.r;
+  document.getElementById("st5").textContent = c.cl;
+}
+
+function visibleData() {
+  return currentLevel==="all" ? allData : allData.filter(function(r){return r.schoolLevel===currentLevel;});
+}
+
+// ── Хүснэгт render ──
+function badge(s) {
+  var m = {
+    "Хянагдаж байна":["b-pending","🔍"],
+    "Арга хэмжээ авагдаж байна":["b-active","⚡"],
+    "Шийдвэрлэгдлээ":["b-done","✅"],
+    "Буцаагдсан — нэмэлт мэдээлэл шаардлагатай":["b-return","⚠️"],
+    "Хаагдлаа":["b-closed","🔒"]
+  };
+  var v = m[s]||["b-pending","❓"];
+  return '<span class="badge '+v[0]+'">'+v[1]+" "+s+'</span>';
+}
+
+function renderTable() {
+  var q  = (document.getElementById("fi-search").value||"").toLowerCase();
+  var st = document.getElementById("fi-status").value;
+  var src = visibleData();
+  filteredRows = src.filter(function(r) {
+    var mq  = !q || [r.code,r.ner,r.tailbar,r.torlud,r.angi].join(" ").toLowerCase().includes(q);
+    var mst = !st || r.status===st;
+    return mq && mst;
+  });
+  document.getElementById("tblCount").textContent = filteredRows.length + " мэдэгдэл";
+  if (!filteredRows.length) {
+    document.getElementById("tblMain").style.display  = "none";
+    document.getElementById("tblEmpty").style.display = "block";
+    return;
+  }
+  document.getElementById("tblEmpty").style.display = "none";
+  document.getElementById("tblMain").style.display  = "table";
+  document.getElementById("tblBody").innerHTML = filteredRows.map(function(r, i) {
+    return '<tr onclick="openModal('+i+')">' +
+      '<td class="td-code">'+(r.code||"—")+'</td>'+
+      '<td><span class="td-sub">'+(r.date||"—")+'</span></td>'+
+      '<td class="td-name">'+(r.angi||"—")+' '+(r.buleg||"")+'<div class="td-sub">'+(r.schoolLevel||"")+'</div></td>'+
+      '<td class="td-name">'+(r.ner||"Нууцлагдсан")+'<div class="td-sub">'+(r.medegedech||"")+'</div></td>'+
+      '<td class="td-desc">'+(r.torlud||"—")+'</td>'+
+      '<td class="td-desc">'+(r.tailbar||"—")+'</td>'+
+      '<td>'+badge(r.status||"Хянагдаж байна")+'</td>'+
+    '</tr>';
+  }).join("");
+}
+
+// ── Modal ──
+function openModal(idx) {
+  activeRow = filteredRows[idx];
+  if (!activeRow) return;
+  document.getElementById("mTitle").textContent = "📋 Мэдэгдэл #"+(activeRow.code||"—");
+  function ii(lbl, val, full) {
+    return '<div class="ii'+(full?" full":"")+'"><label>'+lbl+'</label><span>'+(val||"—")+'</span></div>';
+  }
+  document.getElementById("mGrid").innerHTML =
+    ii("Tracking код", activeRow.code) +
+    ii("Огноо", activeRow.date) +
+    ii("Ангийн түвшин", activeRow.schoolLevel) +
+    ii("Анги, бүлэг", (activeRow.angi||"")+" "+(activeRow.buleg||"")) +
+    ii("Мэдэгдэгчийн нэр", activeRow.ner||"Нууцлагдсан") +
+    ii("Мэдэгдэгч", activeRow.medegedech) +
+    ii("Дээрэлхэлтийн төрөл", activeRow.torlud, true) +
+    ii("Дээрэлхэгчийн нэр", activeRow.bully_ner||"Мэдэгдээгүй") +
+    ii("Дээрэлхэгчийн анги", activeRow.bully_angi) +
+    ii("Болсон газар", activeRow.gazar) +
+    ii("Гэрч", activeRow.gerech) +
+    ii("Нотлох баримт", activeRow.notloh) +
+    ii("Өмнө мэдэгдсэн", activeRow.omno_medegsed) +
+    ii("Нэмэлт тайлбар", activeRow.nemeltel, true);
+  document.getElementById("mDesc").textContent = activeRow.tailbar||"—";
+  document.getElementById("mStatusSel").value  = activeRow.status||"Хянагдаж байна";
+  document.getElementById("mSaveBtn").disabled = false;
+  document.getElementById("mSaveBtn").textContent = "💾 Статус хадгалах";
+  document.getElementById("modalBg").classList.add("open");
+}
+function closeModal() { document.getElementById("modalBg").classList.remove("open"); }
+function bgClose(e)   { if (e.target===document.getElementById("modalBg")) closeModal(); }
+
+// ── Статус хадгалах ──
+function saveStatus() {
+  if (!activeRow) return;
+  var newSt = document.getElementById("mStatusSel").value;
+  var btn   = document.getElementById("mSaveBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Хадгалж байна...";
+  db.collection("reports").doc(activeRow.code).update({ status: newSt })
+    .then(function() {
+      activeRow.status = newSt;
+      updateStats(); renderTable();
+      btn.textContent = "✅ Хадгалагдлаа!";
+      setTimeout(closeModal, 800);
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = "❌ Алдаа — дахин оролд";
+    });
+}
+
+// ── Excel ──
+function exportExcel() {
+  var src = visibleData();
+  if (!src.length) { alert("Татах мэдээлэл байхгүй байна."); return; }
+  var hdrs = ["Код","Огноо","Анги түвшин","Анги","Бүлэг","Нэр","Мэдэгдэгч","Дээрэлхэлтийн төрөл","Болсон газар","Тайлбар","Дээрэлхэгчийн нэр","Нотлох баримт","Өмнө мэдэгдсэн","Нэмэлт тайлбар","Статус"];
+  var csv  = [hdrs.join(",")];
+  src.forEach(function(r){
+    csv.push([
+      r.code, r.date, r.schoolLevel, r.angi, r.buleg,
+      r.ner||"Нууцлагдсан", r.medegedech, r.torlud, r.gazar,
+      '"'+(r.tailbar||"").replace(/"/g,'""')+'"',
+      r.bully_ner, r.notloh, r.omno_medegsed,
+      '"'+(r.nemeltel||"").replace(/"/g,'""')+'"',
+      r.status
+    ].join(","));
+  });
+  var blob = new Blob(["\uFEFF"+csv.join("\n")],{type:"text/csv;charset=utf-8;"});
+  var a    = document.createElement("a");
+  a.href   = URL.createObjectURL(blob);
+  a.download = "medegdel_"+(currentLevel==="all"?"bugd":currentLevel.replace(/ /g,"_"))+"_"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>

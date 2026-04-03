@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мэдэгдэл амжилттай илгээгдлээ</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Nunito",sans-serif;background:linear-gradient(135deg,#5BA4CF 0%,#38A89D 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.15);padding:48px 32px;max-width:500px;width:100%;text-align:center;animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.85);opacity:0}80%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}
+.icon{font-size:72px;margin-bottom:16px;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+h1{font-size:26px;font-weight:900;color:#2D3748;margin-bottom:8px}
+.sub{font-size:14px;color:#718096;line-height:1.7;margin-bottom:28px}
+.code-box{background:linear-gradient(135deg,#5BA4CF,#38A89D);border-radius:18px;padding:28px 24px;margin-bottom:24px;color:#fff}
+.code-label{font-size:11px;font-weight:800;opacity:.8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+.code-num{font-size:52px;font-weight:900;letter-spacing:10px;text-shadow:0 2px 12px rgba(0,0,0,.2);margin-bottom:8px}
+.code-hint{font-size:12px;opacity:.75}
+.tl{text-align:left;background:#F8FAFC;border-radius:14px;padding:20px 22px;margin-bottom:22px}
+.tr{display:flex;gap:14px;align-items:flex-start;position:relative;padding-bottom:4px}
+.tr:not(:last-child)::before{content:"";position:absolute;left:15px;top:34px;width:2px;height:calc(100% - 8px);background:#E2E8F0}
+.tr.done::before{background:#BBF7D0}
+.tr.active::before{background:#C5E1F5}
+.td{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-bottom:20px}
+.tr.done .td{background:#EAF6EA}
+.tr.active .td{background:#EAF4FB;box-shadow:0 0 0 5px rgba(91,164,207,.15);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 5px rgba(91,164,207,.15)}50%{box-shadow:0 0 0 10px rgba(91,164,207,.05)}}
+.tr.pending .td{background:#F1F5F9}
+.tt strong{display:block;font-size:13px;font-weight:800;color:#2D3748;margin-bottom:2px}
+.tr.pending .tt strong{color:#A0AEC0}
+.tt span{font-size:12px;color:#718096}
+.btn-p{display:block;background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:15px;font-weight:800;text-decoration:none;padding:15px 24px;border-radius:14px;margin-bottom:10px;box-shadow:0 6px 20px rgba(91,164,207,.3);transition:all .2s}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(91,164,207,.4)}
+.btn-s{display:block;background:#F0F7FF;color:#5BA4CF;font-family:"Nunito",sans-serif;font-size:14px;font-weight:700;text-decoration:none;padding:12px 24px;border-radius:14px;border:2px solid #C5E1F5;margin-bottom:18px;transition:all .2s}
+.btn-s:hover{background:#E0F0FF}
+.hot{background:#FDEAEA;border:1.5px solid #E07B7B;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;text-align:left}
+.hot strong{color:#E07B7B;font-size:13px;display:block;margin-bottom:3px}
+.hot p{font-size:12px;color:#718096}
+</style>
+</head>
+<body>
+<div class="card">
+  <span class="icon">🎉</span>
+  <h1>Баярлалаа, зоригтой байсан!</h1>
+  <p class="sub">Чиний мэдэгдэл амжилттай бүртгэгдлээ. Сургуулийн эрх бүхий багш удахгүй хянах болно. 💙</p>
+  <div class="code-box">
+    <div class="code-label">📋 Таны tracking код</div>
+    <div class="code-num" id="codeDisplay">------</div>
+    <div class="code-hint">Энэ кодоор мэдэгдлийнхээ явцыг шалгаарай — хадгалж аваарай!</div>
+  </div>
+  <div class="tl">
+    <div class="tr done"><div class="td">✅</div><div class="tt"><strong>Мэдэгдэл илгээгдлээ</strong><span>Таны мэдэгдэл системд амжилттай бүртгэгдлээ</span></div></div>
+    <div class="tr active"><div class="td">🔍</div><div class="tt"><strong>Хянагдаж байна</strong><span>Сургуулийн эрх бүхий багш таны мэдэгдлийг хянаж байна</span></div></div>
+    <div class="tr pending"><div class="td">⚡</div><div class="tt"><strong>Арга хэмжээ авагдана</strong><span>Нөхцөл байдлыг шийдвэрлэх арга хэмжээ авагдана</span></div></div>
+    <div class="tr pending"><div class="td">🎯</div><div class="tt"><strong>Шийдвэрлэгдлээ</strong><span>Асуудал амжилттай шийдвэрлэгдлээ</span></div></div>
+  </div>
+  <a href="track.html" class="btn-p">🔍 Мэдэгдлийнхээ явц шалгах</a>
+  <a href="index.html" class="btn-s">← Буцах</a>
+  <div class="hot">
+    <span style="font-size:24px">🚨</span>
+    <div>
+      <strong>Яаралтай тусламж хэрэгтэй бол:</strong>
+      <p>Хүүхдийн утас: <strong>108</strong> &nbsp;|&nbsp; Цагдаа: <strong>102</strong></p>
+    </div>
+  </div>
+</div>
+<script>
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get("code") || "------";
+  document.getElementById("codeDisplay").textContent = code;
+</script>
+</body>
+</html>
