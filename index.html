@@ -516,7 +516,7 @@
           <input type="checkbox" name="type" value="Бие махбодийн">
           <span class="chk-box"></span>
           <span class="opt-emoji">👊</span>
-          <span class="opt-label">Бие махбодийн (зодох, түлхэх)</span>
+          <span class="opt-label">Бие махбодын (зодох, түлхэх)</span>
         </label>
         <label class="opt-item">
           <input type="checkbox" name="type" value="Цахим дээрэлхэлт">
@@ -528,13 +528,13 @@
           <input type="checkbox" name="type" value="Гадуурхалт">
           <span class="chk-box"></span>
           <span class="opt-emoji">🚫</span>
-          <span class="opt-label">Гадуурхалт (тоохгүй байх, хамт нааддаггүй)</span>
+          <span class="opt-label">Гадуурхалт (тоохгүй байх)</span>
         </label>
         <label class="opt-item">
           <input type="checkbox" name="type" value="Эд хөрөнгийн">
           <span class="chk-box"></span>
           <span class="opt-emoji">🎒</span>
-          <span class="opt-label">Эд хөрөнгийн (зүйл авах, устгах)</span>
+          <span class="opt-label">Эд хөрөнгийн (булаах, авах)</span>
         </label>
         <label class="opt-item">
           <input type="checkbox" name="type" value="Заналхийлэл">
@@ -777,10 +777,10 @@
   const db = firebase.firestore();
 
   var EMAIL_AKHLAKH = "azaa.0623@gmail.com";
-  var EMAIL_DUND    = "saranbilegsaki@gmail.com";
+  var EMAIL_DUND    = "damchiibadgarsaranbileg@gmail.com";
 
   // ── И-мэйл мэдэгдэл — Google Apps Script ──
-  var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbyZFnDMeaqzRSACfJ_l6mOTe0Dh2SVqGS8y0KxYJkSYgXvIf06Cyl-0e6i1EV0qhso5/exec";
+  var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbw-puC0eSBWR8wI5tsNN2sm9cljEua12JhRvOJZ_9rcXoGLhlPIjp9YUTI5LRNzfwtg/exec";
 
   function sendNotificationEmail(payload, code) {
     var msg = "";
