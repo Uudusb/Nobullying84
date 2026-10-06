@@ -23,11 +23,8 @@ body{font-family:"Nunito",sans-serif;background:#F0F7FF;color:#2D3748;min-height
 .input-card h2{font-size:17px;font-weight:800;margin-bottom:6px}
 .input-card p{font-size:13px;color:#718096;line-height:1.7;margin-bottom:22px}
 .digit-label{font-size:11px;font-weight:800;color:#A0AEC0;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:block}
-.digit-row{display:flex;gap:8px;margin-bottom:18px;justify-content:center}
-.digit-box{width:52px;height:64px;border:2.5px solid #E2E8F0;border-radius:14px;background:#F8FAFC;font-family:"Nunito",sans-serif;font-size:28px;font-weight:900;text-align:center;color:#2D3748;outline:none;transition:all .2s;caret-color:#5BA4CF}
-.digit-box::placeholder{color:#CBD5E0}
-.digit-box:focus{border-color:#5BA4CF;background:#fff;box-shadow:0 0 0 4px rgba(91,164,207,.15);transform:translateY(-2px)}
-.digit-box.filled{border-color:#4ECDC4;background:#E8FFFE;color:#38A89D}
+.code-input{width:100%;font-family:"Nunito",sans-serif;font-size:28px;font-weight:900;letter-spacing:6px;text-align:center;text-transform:uppercase;border:2.5px solid #E2E8F0;border-radius:14px;background:#F8FAFC;color:#2D3748;outline:none;padding:16px 12px;margin-bottom:18px;transition:all .2s}
+.code-input:focus{border-color:#5BA4CF;background:#fff;box-shadow:0 0 0 4px rgba(91,164,207,.15)}
 .check-btn{width:100%;background:linear-gradient(135deg,#5BA4CF,#38A89D);color:#fff;font-family:"Nunito",sans-serif;font-size:16px;font-weight:800;border:none;border-radius:14px;padding:16px;cursor:pointer;box-shadow:0 6px 20px rgba(91,164,207,.3);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px}
 .check-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(91,164,207,.4)}
 .check-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
@@ -35,7 +32,7 @@ body{font-family:"Nunito",sans-serif;background:#F0F7FF;color:#2D3748;min-height
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .result-header{padding:18px 24px;border-bottom:1.5px solid #EDF2F7;display:flex;justify-content:space-between;align-items:center}
 .result-meta{font-size:12px;color:#A0AEC0;font-weight:700}
-.result-meta strong{display:block;font-size:20px;font-weight:900;color:#2D3748}
+.result-meta strong{display:block;font-size:20px;font-weight:900;color:#2D3748;letter-spacing:2px}
 .status-banner{padding:24px;text-align:center;border-bottom:1.5px solid #EDF2F7}
 .status-icon{font-size:44px;margin-bottom:10px;display:block}
 .status-name{font-size:20px;font-weight:900;margin-bottom:4px}
@@ -74,22 +71,15 @@ body{font-family:"Nunito",sans-serif;background:#F0F7FF;color:#2D3748;min-height
 <div class="wrap">
   <div class="input-card">
     <h2>📋 Tracking код оруулах</h2>
-    <p>Форм илгээхэд авсан 6 оронтой кодоо доорх хайрцагт оруулна уу.</p>
-    <span class="digit-label">Таны 6 оронтой tracking код</span>
-    <div class="digit-row">
-      <input class="digit-box" id="d1" maxlength="1" inputmode="numeric" placeholder="0" oninput="onDigit(this,'d2')" onkeydown="onKey(event,this,'','d1')">
-      <input class="digit-box" id="d2" maxlength="1" inputmode="numeric" placeholder="0" oninput="onDigit(this,'d3')" onkeydown="onKey(event,this,'d1','d2')">
-      <input class="digit-box" id="d3" maxlength="1" inputmode="numeric" placeholder="0" oninput="onDigit(this,'d4')" onkeydown="onKey(event,this,'d2','d3')">
-      <input class="digit-box" id="d4" maxlength="1" inputmode="numeric" placeholder="0" oninput="onDigit(this,'d5')" onkeydown="onKey(event,this,'d3','d4')">
-      <input class="digit-box" id="d5" maxlength="1" inputmode="numeric" placeholder="0" oninput="onDigit(this,'d6')" onkeydown="onKey(event,this,'d4','d5')">
-      <input class="digit-box" id="d6" maxlength="1" inputmode="numeric" placeholder="0" oninput="onDigit(this,'')" onkeydown="onKey(event,this,'d5','d6')">
-    </div>
+    <p>Форм илгээхэд авсан 8 тэмдэгттэй кодоо доор оруулна уу.</p>
+    <span class="digit-label">Таны 8 тэмдэгттэй tracking код</span>
+    <input class="code-input" id="codeInput" maxlength="8" autocomplete="off" placeholder="A3K9X2M7" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)" onkeydown="if(event.key==='Enter')checkStatus()">
     <button class="check-btn" id="checkBtn" onclick="checkStatus()">🔍 Статус шалгах</button>
   </div>
   <div class="result-card" id="resultCard">
     <div class="result-header">
-      <div class="result-meta">Tracking код<strong id="resCode">------</strong></div>
-      <div class="result-meta" style="text-align:right">Огноо<strong id="resDate" style="font-size:13px">--</strong></div>
+      <div class="result-meta">Tracking код<strong id="resCode">--------</strong></div>
+      <div class="result-meta" style="text-align:right">Огноо<strong id="resDate" style="font-size:13px;letter-spacing:0">--</strong></div>
     </div>
     <div class="status-banner" id="statusBanner"></div>
     <div class="timeline" id="timeline"></div>
@@ -97,7 +87,7 @@ body{font-family:"Nunito",sans-serif;background:#F0F7FF;color:#2D3748;min-height
   <div class="error-card" id="errorCard">
     <div class="error-icon">❌</div>
     <h3>Код олдсонгүй</h3>
-    <p>Оруулсан <strong id="wrongCode"></strong> код системд бүртгэгдээгүй байна.<br>Зөв 6 оронтой tracking кодоо оруулна уу.</p>
+    <p>Оруулсан <strong id="wrongCode"></strong> код системд бүртгэгдээгүй байна.<br>Зөв 8 тэмдэгттэй tracking кодоо оруулна уу.</p>
   </div>
   <div class="hotline">
     <span style="font-size:24px">🚨</span>
@@ -109,100 +99,116 @@ body{font-family:"Nunito",sans-serif;background:#F0F7FF;color:#2D3748;min-height
 </div>
 <script>
 const firebaseConfig = {
-    apiKey: "AIzaSyB0xlNX4MQwVtejTT_3KmyLSp3MUueQFVg",
-    authDomain: "school-bullying-report.firebaseapp.com",
-    projectId: "school-bullying-report",
-    storageBucket: "school-bullying-report.firebasestorage.app",
-    messagingSenderId: "644776624035",
-    appId: "1:644776624035:web:0037ea74bd6300cc622416"
-  };
-  if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-  const db = firebase.firestore();
-var STATUS_CFG={
-  "Хянагдаж байна":{color:"#5BA4CF",bg:"#EAF4FB",border:"#C5E1F5",icon:"🔍",step:1,desc:"Сургуулийн эрх бүхий багш таны мэдэгдлийг хянаж байна"},
-  "Арга хэмжээ авагдаж байна":{color:"#D97706",bg:"#FFFBEB",border:"#FDE68A",icon:"⚡",step:2,desc:"Нөхцөл байдлыг шийдвэрлэж байна"},
-  "Шийдвэрлэгдлээ":{color:"#5CB85C",bg:"#EAF6EA",border:"#BBF7D0",icon:"✅",step:3,desc:"Асуудал амжилттай шийдвэрлэгдлээ"},
-  "Буцаагдсан — нэмэлт мэдээлэл шаардлагатай":{color:"#E07B7B",bg:"#FDEAEA",border:"#FFD0D0",icon:"⚠️",step:0,desc:"Багш нэмэлт мэдээлэл хүсэж байна"},
-  "Хаагдлаа":{color:"#718096",bg:"#F7FAFC",border:"#E2E8F0",icon:"🔒",step:4,desc:"Мэдэгдэл хаагдсан"}
+  apiKey: "AIzaSyB0xlNX4MQwVtejTT_3KmyLSp3MUueQFVg",
+  authDomain: "school-bullying-report.firebaseapp.com",
+  projectId: "school-bullying-report",
+  storageBucket: "school-bullying-report.firebasestorage.app",
+  messagingSenderId: "644776624035",
+  appId: "1:644776624035:web:0037ea74bd6300cc622416"
 };
-var TIMELINE=[
-  {label:"Мэдэгдэл илгээгдлээ",desc:"Таны мэдэгдэл системд амжилттай бүртгэгдлээ"},
-  {label:"Хянагдаж байна",desc:"Сургуулийн эрх бүхий багш таны мэдэгдлийг хянаж байна"},
-  {label:"Арга хэмжээ авагдаж байна",desc:"Нөхцөл байдлыг шийдвэрлэж байна"},
-  {label:"Шийдвэрлэгдлээ",desc:"Асуудал амжилттай шийдвэрлэгдлээ"}
+if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+const db = firebase.firestore();
+
+var STATUS_CFG = {
+  "Хянагдаж байна": { color: "#5BA4CF", bg: "#EAF4FB", border: "#C5E1F5", icon: "🔍", step: 1, desc: "Сургуулийн эрх бүхий багш таны мэдэгдлийг хянаж байна" },
+  "Арга хэмжээ авагдаж байна": { color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", icon: "⚡", step: 2, desc: "Нөхцөл байдлыг шийдвэрлэж байна" },
+  "Шийдвэрлэгдлээ": { color: "#5CB85C", bg: "#EAF6EA", border: "#BBF7D0", icon: "✅", step: 3, desc: "Асуудал амжилттай шийдвэрлэгдлээ" },
+  "Буцаагдсан — нэмэлт мэдээлэл шаардлагатай": { color: "#E07B7B", bg: "#FDEAEA", border: "#FFD0D0", icon: "⚠️", step: 0, desc: "Багш нэмэлт мэдээлэл хүсэж байна" },
+  "Хаагдлаа": { color: "#718096", bg: "#F7FAFC", border: "#E2E8F0", icon: "🔒", step: 4, desc: "Мэдэгдэл хаагдсан" }
+};
+var TIMELINE = [
+  { label: "Мэдэгдэл илгээгдлээ", desc: "Таны мэдэгдэл системд амжилттай бүртгэгдлээ" },
+  { label: "Хянагдаж байна", desc: "Сургуулийн эрх бүхий багш таны мэдэгдлийг хянаж байна" },
+  { label: "Арга хэмжээ авагдаж байна", desc: "Нөхцөл байдлыг шийдвэрлэж байна" },
+  { label: "Шийдвэрлэгдлээ", desc: "Асуудал амжилттай шийдвэрлэгдлээ" }
 ];
-function onDigit(el,n){el.value=el.value.replace(/[^0-9]/g,"");el.classList.toggle("filled",el.value!=="");if(el.value&&n)document.getElementById(n).focus();}
-function onKey(e,el,p,c){if(e.key==="Backspace"&&!el.value&&p){var pv=document.getElementById(p);pv.value="";pv.classList.remove("filled");pv.focus();}}
-function getCode(){return["d1","d2","d3","d4","d5","d6"].map(function(id){return document.getElementById(id).value;}).join("");}
-function checkStatus(){
-  var code=getCode();
-  if(code.length!==6){alert("6 оронтой код оруулна уу!");return;}
-  var btn=document.getElementById("checkBtn");
-  btn.innerHTML="⏳ Хайж байна...";btn.disabled=true;
-  document.getElementById("resultCard").style.display="none";
-  document.getElementById("errorCard").style.display="none";
-  db.collection("reports").doc(code).get()
-  .then(function(doc){
-    if(doc.exists){
-      var data=doc.data();
-      data.success=true;
-      data.code=code;
-      showResult(data);
-    } else {
-      document.getElementById("wrongCode").textContent=code;
-      document.getElementById("errorCard").style.display="block";
-      document.getElementById("errorCard").scrollIntoView({behavior:"smooth"});
-    }
-    btn.innerHTML="🔍 Статус шалгах";btn.disabled=false;
-  })
-  .catch(function(err){alert("Алдаа гарлаа: "+err.message);btn.innerHTML="🔍 Статус шалгах";btn.disabled=false;});
+
+function getCode() {
+  return (document.getElementById("codeInput").value || "").trim().toUpperCase();
 }
-function showResult(data){
-  var cfg=STATUS_CFG[data.status]||STATUS_CFG["Хянагдаж байна"];
-  document.getElementById("resCode").textContent=data.code;
-  document.getElementById("resDate").textContent=data.date||"--";
-  var banner=document.getElementById("statusBanner");
-  banner.style.background=cfg.bg;banner.style.borderBottom="1.5px solid "+cfg.border;
-  banner.innerHTML="<span class='status-icon'>"+cfg.icon+"</span><div class='status-name' style='color:"+cfg.color+"'>"+data.status+"</div><div class='status-desc'>"+cfg.desc+"</div>";
-  if(data.status==="Буцаагдсан — нэмэлт мэдээлэл шаардлагатай"){
-    // Banner харуулна
-    banner.style.background="#FDEAEA";
-    banner.style.borderBottom="1.5px solid #FFD0D0";
-    banner.innerHTML="<span class='status-icon'>⚠️</span><div class='status-name' style='color:#E07B7B'>Буцаагдсан — нэмэлт мэдээлэл шаардлагатай</div><div class='status-desc'>Багш нэмэлт мэдээлэл хүсэж байна</div>";
-    // Timeline: хянасан + буцаасан
-    var tl=document.getElementById("timeline");tl.innerHTML="";
-    var steps=[
-      {cls:"done",icon:"✅",label:"Мэдэгдэл илгээгдлээ",desc:"Таны мэдэгдэл системд амжилттай бүртгэгдлээ"},
-      {cls:"done",icon:"✅",label:"Хянагдаж байна",desc:"Сургуулийн эрх бүхий багш таны мэдэгдлийг хянасан"},
-      {cls:"active",icon:"⚠️",label:"Нэмэлт мэдээлэл шаардлагатай",desc:"Багш нэмэлт мэдээлэл хүсэж байна. Шинэ форм бөглөнө үү."},
+
+function checkStatus() {
+  var code = getCode();
+  if (code.length !== 8) { alert("8 тэмдэгттэй код оруулна уу!"); return; }
+  var btn = document.getElementById("checkBtn");
+  btn.innerHTML = "⏳ Хайж байна...";
+  btn.disabled = true;
+  document.getElementById("resultCard").style.display = "none";
+  document.getElementById("errorCard").style.display = "none";
+  var oldAction = document.getElementById("trackAction");
+  if (oldAction) oldAction.remove();
+
+  // Only publicStatus — no PII from reports
+  db.collection("publicStatus").doc(code).get()
+    .then(function(doc) {
+      if (doc.exists) {
+        var data = doc.data();
+        showResult({ code: code, status: data.status, date: data.date || "--" });
+      } else {
+        document.getElementById("wrongCode").textContent = code;
+        document.getElementById("errorCard").style.display = "block";
+        document.getElementById("errorCard").scrollIntoView({ behavior: "smooth" });
+      }
+      btn.innerHTML = "🔍 Статус шалгах";
+      btn.disabled = false;
+    })
+    .catch(function(err) {
+      alert("Алдаа гарлаа: " + err.message);
+      btn.innerHTML = "🔍 Статус шалгах";
+      btn.disabled = false;
+    });
+}
+
+function showResult(data) {
+  var cfg = STATUS_CFG[data.status] || STATUS_CFG["Хянагдаж байна"];
+  document.getElementById("resCode").textContent = data.code;
+  document.getElementById("resDate").textContent = data.date || "--";
+  var banner = document.getElementById("statusBanner");
+  banner.style.background = cfg.bg;
+  banner.style.borderBottom = "1.5px solid " + cfg.border;
+  banner.innerHTML = "<span class='status-icon'>" + cfg.icon + "</span><div class='status-name' style='color:" + cfg.color + "'>" + data.status + "</div><div class='status-desc'>" + cfg.desc + "</div>";
+
+  var tl = document.getElementById("timeline");
+  tl.innerHTML = "";
+
+  if (data.status === "Буцаагдсан — нэмэлт мэдээлэл шаардлагатай") {
+    var steps = [
+      { cls: "done", icon: "✅", label: "Мэдэгдэл илгээгдлээ", desc: "Таны мэдэгдэл системд амжилттай бүртгэгдлээ" },
+      { cls: "done", icon: "✅", label: "Хянагдаж байна", desc: "Сургуулийн эрх бүхий багш таны мэдэгдлийг хянасан" },
+      { cls: "active", icon: "⚠️", label: "Нэмэлт мэдээлэл шаардлагатай", desc: "Багш нэмэлт мэдээлэл хүсэж байна. Шинэ форм бөглөнө үү." }
     ];
-    steps.forEach(function(s){
-      var div=document.createElement("div");div.className="tl-row "+s.cls;
-      div.innerHTML="<div class='tl-dot'>"+s.icon+"</div><div class='tl-text'><strong>"+s.label+"</strong><span>"+s.desc+"</span></div>";
+    steps.forEach(function(s) {
+      var div = document.createElement("div");
+      div.className = "tl-row " + s.cls;
+      div.innerHTML = "<div class='tl-dot'>" + s.icon + "</div><div class='tl-text'><strong>" + s.label + "</strong><span>" + s.desc + "</span></div>";
       tl.appendChild(div);
     });
-    // Action товч
-    var action=document.createElement("div");
-    action.style.cssText="padding:16px 24px;text-align:center;border-top:1.5px solid #EDF2F7";
-    action.innerHTML="<a href='index.html' style='display:inline-flex;align-items:center;gap:8px;background:#E07B7B;color:#fff;font-family:inherit;font-size:14px;font-weight:800;text-decoration:none;padding:12px 24px;border-radius:12px'>📝 Шинэ форм бөглөх</a>";
-    tl.parentElement.appendChild(action);
-    document.getElementById("resultCard").style.display="block";
-    document.getElementById("resultCard").scrollIntoView({behavior:"smooth"});
-    return;
+    var action = document.createElement("div");
+    action.id = "trackAction";
+    action.style.cssText = "padding:16px 24px;text-align:center;border-top:1.5px solid #EDF2F7";
+    action.innerHTML = "<a href='index.html' style='display:inline-flex;align-items:center;gap:8px;background:#E07B7B;color:#fff;font-family:inherit;font-size:14px;font-weight:800;text-decoration:none;padding:12px 24px;border-radius:12px'>📝 Шинэ форм бөглөх</a>";
+    document.getElementById("resultCard").appendChild(action);
+  } else {
+    for (var i = 0; i < TIMELINE.length; i++) {
+      var s = TIMELINE[i];
+      var cls = i === 0 ? "done" : i < cfg.step ? "done" : i === cfg.step ? "active" : "pending";
+      var icon = i === 0 ? "✅" : i < cfg.step ? "✅" : (i === cfg.step ? cfg.icon : "○");
+      var div = document.createElement("div");
+      div.className = "tl-row " + cls;
+      div.innerHTML = "<div class='tl-dot'>" + icon + "</div><div class='tl-text'><strong>" + s.label + "</strong><span>" + s.desc + "</span></div>";
+      tl.appendChild(div);
+    }
   }
-  var tl=document.getElementById("timeline");tl.innerHTML="";
-  for(var i=0;i<TIMELINE.length;i++){
-    var s=TIMELINE[i];
-    var cls=i===0?"done":i<cfg.step?"done":i===cfg.step?"active":"pending";
-    var icon=i===0?"✅":i<cfg.step?"✅":(i===cfg.step?cfg.icon:"○");
-    var div=document.createElement("div");div.className="tl-row "+cls;
-    div.innerHTML="<div class='tl-dot'>"+icon+"</div><div class='tl-text'><strong>"+s.label+"</strong><span>"+s.desc+"</span></div>";
-    tl.appendChild(div);
-  }
-  document.getElementById("resultCard").style.display="block";
-  document.getElementById("resultCard").scrollIntoView({behavior:"smooth"});
+  document.getElementById("resultCard").style.display = "block";
+  document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" });
 }
-document.getElementById("d1").focus();
+
+document.getElementById("codeInput").focus();
+var params = new URLSearchParams(window.location.search);
+var preset = params.get("code");
+if (preset) {
+  document.getElementById("codeInput").value = preset.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+}
 </script>
 </body>
 </html>

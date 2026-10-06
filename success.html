@@ -16,7 +16,7 @@ h1{font-size:26px;font-weight:900;color:#2D3748;margin-bottom:8px}
 .sub{font-size:14px;color:#718096;line-height:1.7;margin-bottom:28px}
 .code-box{background:linear-gradient(135deg,#5BA4CF,#38A89D);border-radius:18px;padding:28px 24px;margin-bottom:24px;color:#fff}
 .code-label{font-size:11px;font-weight:800;opacity:.8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
-.code-num{font-size:52px;font-weight:900;letter-spacing:10px;text-shadow:0 2px 12px rgba(0,0,0,.2);margin-bottom:8px}
+.code-num{font-size:40px;font-weight:900;letter-spacing:6px;text-shadow:0 2px 12px rgba(0,0,0,.2);margin-bottom:8px;word-break:break-all}
 .code-hint{font-size:12px;opacity:.75}
 .tl{text-align:left;background:#F8FAFC;border-radius:14px;padding:20px 22px;margin-bottom:22px}
 .tr{display:flex;gap:14px;align-items:flex-start;position:relative;padding-bottom:4px}
@@ -68,7 +68,7 @@ h1{font-size:26px;font-weight:900;color:#2D3748;margin-bottom:8px}
 </div>
 <script>
   var params = new URLSearchParams(window.location.search);
-  var code = params.get("code") || "------";
+  var code = (params.get("code") || "--------").toUpperCase();
   document.getElementById("codeDisplay").textContent = code;
 </script>
 </body>

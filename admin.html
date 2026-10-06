@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Багшийн Dashboard — Мэдэгдлийн удирдлага</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -276,14 +277,14 @@ td{padding:12px 14px;vertical-align:middle}
       <button class="m-close" onclick="closeForgotModal()">✕</button>
     </div>
     <div class="pw-body">
-      <p style="font-size:13px;color:#718096;margin-bottom:16px;line-height:1.6">И-мэйл хаягаа оруулна уу. Таны бүртгэлтэй и-мэйл рүү шинэ нууц үг илгээгдэнэ.</p>
+      <p style="font-size:13px;color:#718096;margin-bottom:16px;line-height:1.6">И-мэйл хаягаа оруулна уу. Firebase таны бүртгэлтэй и-мэйл рүү нууц үг сэргээх холбоос илгээнэ.</p>
       <div class="pw-err" id="forgotErr"></div>
       <div class="pw-ok" id="forgotOk"></div>
       <div class="pw-field">
         <label>И-мэйл хаяг</label>
         <input type="email" id="forgotEmail" placeholder="email@gmail.com">
       </div>
-      <button class="pw-btn" id="forgotBtn" onclick="resetPassword()">📧 Нууц үг и-мэйлээр авах</button>
+      <button class="pw-btn" id="forgotBtn" onclick="resetPassword()">📧 Сэргээх холбоос илгээх</button>
     </div>
   </div>
 </div>
@@ -343,67 +344,79 @@ td{padding:12px 14px;vertical-align:middle}
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-//  ТОХИРГОО — доорх 2 утгыг өөрийнхөөрөө солино уу
-// ══════════════════════════════════════════════════════════
-
 const firebaseConfig = {
-    apiKey: "AIzaSyB0xlNX4MQwVtejTT_3KmyLSp3MUueQFVg",
-    authDomain: "school-bullying-report.firebaseapp.com",
-    projectId: "school-bullying-report",
-    storageBucket: "school-bullying-report.firebasestorage.app",
-    messagingSenderId: "644776624035",
-    appId: "1:644776624035:web:0037ea74bd6300cc622416"
-  };
-  if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-  const db = firebase.firestore();
-
-// Зөвшөөрөгдсөн нэвтрэлтүүд
-// нууц үгийг өөрчлөхдөө энд засна
-var ALLOWED = {
-  "uudusbayarsaikhan@gmail.com": { password: "12345678", level: "all",        role: "Ерөнхий админ" },
-  "azaa.m0623@gmail.com":        { password: "12345678", level: "Ахлах анги", role: "Ахлах ангийн нийгмийн ажилтан" },
-  "damchiibadgarsaranbileg@gmail.com": { password: "12345678", level: "Дунд анги",  role: "Дунд ангийн нийгмийн ажилтан" }
+  apiKey: "AIzaSyB0xlNX4MQwVtejTT_3KmyLSp3MUueQFVg",
+  authDomain: "school-bullying-report.firebaseapp.com",
+  projectId: "school-bullying-report",
+  storageBucket: "school-bullying-report.firebasestorage.app",
+  messagingSenderId: "644776624035",
+  appId: "1:644776624035:web:0037ea74bd6300cc622416"
 };
-// ══════════════════════════════════════════════════════════
+if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// Role map only (NO passwords). Real auth = Firebase Authentication.
+var ADMIN_ROLES = {
+  "uudusbayarsaikhan@gmail.com": { level: "all", role: "Ерөнхий админ" },
+  "azaa.m0623@gmail.com": { level: "Ахлах анги", role: "Ахлах ангийн нийгмийн ажилтан" },
+  "damchiibadgarsaranbileg@gmail.com": { level: "Дунд анги", role: "Дунд ангийн нийгмийн ажилтан" }
+};
 
 var currentUser = null;
-var allData     = [];
+var allData = [];
 var currentLevel = "all";
-var activeRow   = null;
+var activeRow = null;
 var filteredRows = [];
+var authReady = false;
 
-// ── Нэвтрэлт ──
+auth.onAuthStateChanged(function(user) {
+  authReady = true;
+  if (!user) {
+    currentUser = null;
+    document.getElementById("dashPage").style.display = "none";
+    document.getElementById("loginPage").style.display = "flex";
+    return;
+  }
+  var email = (user.email || "").toLowerCase();
+  var perm = ADMIN_ROLES[email];
+  if (!perm) {
+    auth.signOut();
+    showErr("❌ Энэ и-мэйл админ эрхгүй байна.");
+    return;
+  }
+  currentUser = { email: email, name: email, level: perm.level, role: perm.role };
+  enterDashboard();
+});
+
 function doLogin() {
   var email = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
-  var pass  = document.getElementById("loginPass").value || "";
-  var errEl = document.getElementById("loginErr");
-  errEl.style.display = "none";
+  var pass = document.getElementById("loginPass").value || "";
+  document.getElementById("loginErr").style.display = "none";
   if (!email || !pass) { showErr("И-мэйл болон нууц үгээ оруулна уу."); return; }
-  var perm = ALLOWED[email];
-  if (!perm) { showErr("❌ Энэ и-мэйл хаяг бүртгэлгүй байна."); return; }
+  if (!ADMIN_ROLES[email]) { showErr("❌ Энэ и-мэйл хаяг бүртгэлгүй байна."); return; }
 
-  // Firebase-аас нууц үг уншиж шалгах
-  db.collection("admins").doc(email).get().then(function(doc) {
-    var storedPass = doc.exists && doc.data().password ? doc.data().password : perm.password;
-    if (storedPass !== pass) {
-      showErr("❌ И-мэйл эсвэл нууц үг буруу байна.");
+  var btn = document.querySelector(".login-btn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Нэвтэрч байна...";
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .catch(function(err) {
+      var msg = "❌ И-мэйл эсвэл нууц үг буруу байна.";
+      if (err && err.code === "auth/user-not-found") {
+        msg = "❌ Firebase Auth дээр энэ хэрэглэгч бүртгэгдээгүй байна. Console-оос үүсгэнэ үү.";
+      } else if (err && err.code === "auth/too-many-requests") {
+        msg = "❌ Хэт олон оролдлого. Түр хүлээнэ үү.";
+      } else if (err && err.code === "auth/operation-not-allowed") {
+        msg = "❌ Firebase Console → Authentication → Email/Password-ийг асаана уу.";
+      }
+      showErr(msg);
       document.getElementById("loginPass").value = "";
-      document.getElementById("loginPass").focus();
-      return;
-    }
-    currentUser = { email: email, name: email, picture: "", level: perm.level, role: perm.role };
-    enterDashboard();
-  }).catch(function() {
-    // Firebase алдаа гарвал default нууц үгээр нэвтрэх
-    if (perm.password !== pass) {
-      showErr("❌ И-мэйл эсвэл нууц үг буруу байна.");
-      document.getElementById("loginPass").value = "";
-      return;
-    }
-    currentUser = { email: email, name: email, picture: "", level: perm.level, role: perm.role };
-    enterDashboard();
-  });
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.textContent = "🚀 Нэвтрэх";
+    });
 }
 
 function showErr(msg) {
@@ -412,11 +425,10 @@ function showErr(msg) {
   el.textContent = msg;
 }
 
-// ── Нууц үг мартсан ──
 function openForgotModal() {
   document.getElementById("forgotEmail").value = "";
   document.getElementById("forgotErr").style.display = "none";
-  document.getElementById("forgotOk").style.display  = "none";
+  document.getElementById("forgotOk").style.display = "none";
   document.getElementById("forgotModalBg").classList.add("open");
 }
 function closeForgotModal() {
@@ -425,85 +437,57 @@ function closeForgotModal() {
 function resetPassword() {
   var email = (document.getElementById("forgotEmail").value || "").trim().toLowerCase();
   var errEl = document.getElementById("forgotErr");
-  var okEl  = document.getElementById("forgotOk");
+  var okEl = document.getElementById("forgotOk");
   errEl.style.display = "none";
-  okEl.style.display  = "none";
+  okEl.style.display = "none";
 
-  if (!email) { errEl.textContent = "И-мэйл хаягаа оруулна уу."; errEl.style.display="block"; return; }
-  if (!ALLOWED[email]) { errEl.textContent = "❌ Энэ и-мэйл хаяг бүртгэлгүй байна."; errEl.style.display="block"; return; }
+  if (!email) { errEl.textContent = "И-мэйл хаягаа оруулна уу."; errEl.style.display = "block"; return; }
+  if (!ADMIN_ROLES[email]) { errEl.textContent = "❌ Энэ и-мэйл хаяг бүртгэлгүй байна."; errEl.style.display = "block"; return; }
 
   var btn = document.getElementById("forgotBtn");
   btn.disabled = true;
   btn.textContent = "⏳ Илгээж байна...";
 
-  // Санамсаргүй шинэ нууц үг үүсгэх
-  var chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-  var newPass = "";
-  for (var i = 0; i < 8; i++) {
-    newPass += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-
-  // Firebase-д хадгалах
-  db.collection("admins").doc(email).set({ password: newPass }, { merge: true })
+  auth.sendPasswordResetEmail(email)
     .then(function() {
-      ALLOWED[email].password = newPass;
-
-      // Apps Script-ээр и-мэйл явуулах
-      var NOTIFY_URL = "https://script.google.com/macros/s/AKfycbyZFnDMeaqzRSACfJ_l6mOTe0Dh2SVqGS8y0KxYJkSYgXvIf06Cyl-0e6i1EV0qhso5/exec";
-      var msg = "Таны шинэ нууц үг: " + newPass + "\r\n\r\nНэвтэрсний дараа нууц үгээ солино уу.";
-      fetch(NOTIFY_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          code: "RESET",
-          level: ALLOWED[email] ? ALLOWED[email].level : "Дунд анги",
-          message: msg,
-          subject: "[Багшийн систем] Таны шинэ нууц үг"
-        }),
-        headers: { "Content-Type": "text/plain;charset=utf-8" }
-      });
-
-      okEl.textContent = "✅ Шинэ нууц үг таны и-мэйл рүү илгээгдлээ!";
+      okEl.textContent = "✅ Сэргээх холбоос и-мэйл рүү илгээгдлээ!";
       okEl.style.display = "block";
-      btn.disabled = false;
-      btn.textContent = "📧 Нууц үг и-мэйлээр авах";
       setTimeout(closeForgotModal, 2500);
     })
     .catch(function(err) {
-      errEl.textContent = "Алдаа гарлаа: " + err.message;
+      errEl.textContent = "Алдаа: " + (err && err.message ? err.message : "амжилтгүй");
       errEl.style.display = "block";
+    })
+    .finally(function() {
       btn.disabled = false;
-      btn.textContent = "📧 Нууц үг и-мэйлээр авах";
+      btn.textContent = "📧 Сэргээх холбоос илгээх";
     });
 }
 
-// ── Нууц үг солих ──
 function openPwModal() {
   document.getElementById("pwCurrent").value = "";
   document.getElementById("pwNew").value = "";
   document.getElementById("pwConfirm").value = "";
   document.getElementById("pwErr").style.display = "none";
-  document.getElementById("pwOk").style.display  = "none";
+  document.getElementById("pwOk").style.display = "none";
   document.getElementById("pwModalBg").classList.add("open");
 }
 function closePwModal() {
   document.getElementById("pwModalBg").classList.remove("open");
 }
 function changePassword() {
-  var cur     = document.getElementById("pwCurrent").value;
-  var nw      = document.getElementById("pwNew").value;
+  var cur = document.getElementById("pwCurrent").value;
+  var nw = document.getElementById("pwNew").value;
   var confirm = document.getElementById("pwConfirm").value;
-  var errEl   = document.getElementById("pwErr");
-  var okEl    = document.getElementById("pwOk");
+  var errEl = document.getElementById("pwErr");
+  var okEl = document.getElementById("pwOk");
   errEl.style.display = "none";
-  okEl.style.display  = "none";
+  okEl.style.display = "none";
 
+  var user = auth.currentUser;
+  if (!user) { errEl.textContent = "Нэвтэрээгүй байна."; errEl.style.display = "block"; return; }
   if (!cur || !nw || !confirm) {
     errEl.textContent = "Бүх талбарыг бөглөнө үү.";
-    errEl.style.display = "block"; return;
-  }
-  // Одоогийн нууц үг шалгах
-  if (ALLOWED[currentUser.email].password !== cur) {
-    errEl.textContent = "❌ Одоогийн нууц үг буруу байна.";
     errEl.style.display = "block"; return;
   }
   if (nw.length < 6) {
@@ -514,40 +498,41 @@ function changePassword() {
     errEl.textContent = "❌ Шинэ нууц үг таарахгүй байна.";
     errEl.style.display = "block"; return;
   }
-  // Firebase-д хадгалах
-  db.collection("admins").doc(currentUser.email).set({ password: nw }, { merge: true })
+
+  var cred = firebase.auth.EmailAuthProvider.credential(user.email, cur);
+  user.reauthenticateWithCredential(cred)
+    .then(function() { return user.updatePassword(nw); })
     .then(function() {
-      ALLOWED[currentUser.email].password = nw;
       okEl.style.display = "block";
       document.getElementById("pwCurrent").value = "";
       document.getElementById("pwNew").value = "";
       document.getElementById("pwConfirm").value = "";
       setTimeout(closePwModal, 1500);
-    }).catch(function(err) {
-      errEl.textContent = "Firebase алдаа: " + err.message;
+    })
+    .catch(function(err) {
+      errEl.textContent = (err && err.code === "auth/wrong-password")
+        ? "❌ Одоогийн нууц үг буруу байна."
+        : ("Алдаа: " + (err && err.message ? err.message : "амжилтгүй"));
       errEl.style.display = "block";
     });
 }
 
 function signOut() {
-  currentUser = null; allData = []; filteredRows = [];
-  document.getElementById("dashPage").style.display  = "none";
-  document.getElementById("loginPage").style.display = "flex";
-  document.getElementById("loginErr").style.display  = "none";
-  document.getElementById("loginEmail").value = "";
-  document.getElementById("loginPass").value  = "";
+  allData = [];
+  filteredRows = [];
+  auth.signOut();
 }
 
 function enterDashboard() {
   document.getElementById("loginPage").style.display = "none";
-  document.getElementById("dashPage").style.display  = "block";
-  document.getElementById("userName").textContent    = currentUser.name;
-  document.getElementById("levelLabel").textContent  = currentUser.role;
-  // "all" эрхтэй бол tabs харуул
+  document.getElementById("dashPage").style.display = "block";
+  document.getElementById("userName").textContent = currentUser.name;
+  document.getElementById("levelLabel").textContent = currentUser.role;
   if (currentUser.level === "all") {
     document.getElementById("levelTabs").style.display = "flex";
     currentLevel = "all";
   } else {
+    document.getElementById("levelTabs").style.display = "none";
     currentLevel = currentUser.level;
   }
   loadData();
@@ -710,7 +695,12 @@ function saveStatus() {
   var btn   = document.getElementById("mSaveBtn");
   btn.disabled = true;
   btn.textContent = "⏳ Хадгалж байна...";
-  db.collection("reports").doc(activeRow.code).update({ status: newSt })
+  var batch = db.batch();
+  var reportRef = db.collection("reports").doc(activeRow.code);
+  var statusRef = db.collection("publicStatus").doc(activeRow.code);
+  batch.update(reportRef, { status: newSt });
+  batch.set(statusRef, { code: activeRow.code, status: newSt, date: activeRow.date || "" }, { merge: true });
+  batch.commit()
     .then(function() {
       activeRow.status = newSt;
       updateStats(); renderTable();

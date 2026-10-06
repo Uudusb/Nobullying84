@@ -360,9 +360,6 @@
     <a href="track.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-family:inherit;font-size:14px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:999px;backdrop-filter:blur(8px);">
       🔍 Мэдэгдлийн явц шалгах
     </a>
-    <a href="admin.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-family:inherit;font-size:14px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:999px;backdrop-filter:blur(8px);">
-      🔐 Багшийн нэвтрэх хэсэг
-    </a>
   </div>
 </div>
 
@@ -405,12 +402,21 @@
     </div>
     <div class="section-body">
 
+      <div class="field">
+        <label class="opt-item" style="max-width:420px">
+          <input type="checkbox" id="f_anon" onchange="onAnonChange()">
+          <span class="chk-box"></span>
+          <span class="opt-emoji">🕵️</span>
+          <span class="opt-label">Нэрээ нууцлах (заавал биш)</span>
+        </label>
+      </div>
+
       <div class="row2">
-          <div class="field">
+          <div class="field" id="ner-field">
             <label class="field-label">
-              Нэр, овог <span class="req">*</span>
+              Нэр, овог <span class="req" id="ner-req">*</span>
             </label>
-            <input type="text" id="f_ner" placeholder="Жишээ: Болд Батаа" required>
+            <input type="text" id="f_ner" placeholder="Жишээ: Болд Батаа">
           </div>
           <div class="field">
             <label class="field-label">
@@ -823,6 +829,35 @@
   }
 
 
+  function onAnonChange() {
+    var anon = document.getElementById("f_anon").checked;
+    var ner = document.getElementById("f_ner");
+    var req = document.getElementById("ner-req");
+    if (anon) {
+      ner.value = "";
+      ner.disabled = true;
+      ner.placeholder = "Нууцлагдсан";
+      if (req) req.style.display = "none";
+    } else {
+      ner.disabled = false;
+      ner.placeholder = "Жишээ: Болд Батаа";
+      if (req) req.style.display = "";
+    }
+  }
+
+  function makeTrackingCode() {
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    var code = "";
+    if (window.crypto && crypto.getRandomValues) {
+      var arr = new Uint32Array(8);
+      crypto.getRandomValues(arr);
+      for (var i = 0; i < 8; i++) code += chars[arr[i] % chars.length];
+    } else {
+      for (var j = 0; j < 8; j++) code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return code;
+  }
+
   function onLevelChange() {
     var level = getRadio("schoolLevel");
     var angiSel = document.getElementById("f_angi");
@@ -912,7 +947,9 @@
   }
 
   function validate() {
-    if (vText("f_ner") === "Хоосон") { alert("Нэр, овогоо оруулна уу!"); return false; }
+    var anon = document.getElementById("f_anon") && document.getElementById("f_anon").checked;
+    if (!anon && vText("f_ner") === "Хоосон") { alert("Нэр, овогоо оруулна уу! Эсвэл «Нэрээ нууцлах»-ыг сонгоно уу."); return false; }
+    if (!getRadio("gender")) { alert("Хүйс сонгоно уу!"); return false; }
     if (!getRadio("schoolLevel")) { alert("Ангийн түвшинг сонгоно уу!"); return false; }
     if (vSelect("f_angi") === 0) { alert("Анги сонгоно уу!"); return false; }
     if (vSelect("f_buleg") === 0) { alert("Бүлэг сонгоно уу!"); return false; }
@@ -930,14 +967,17 @@
     btn.innerHTML = "Илгээж байна...";
     btn.disabled = true;
 
-    var clientCode = Math.floor(100000 + Math.random() * 900000).toString();
+    var clientCode = makeTrackingCode();
     var level = getRadio("schoolLevel") === "akhlakh" ? "Ахлах анги" : "Дунд анги";
+    var anon = document.getElementById("f_anon") && document.getElementById("f_anon").checked;
+    var nowIso = new Date().toISOString();
     var payload = {
       code:          clientCode,
-      date:          new Date().toISOString(),
+      date:          nowIso,
       angi:          selText("f_angi"),
       buleg:         selText("f_buleg"),
-      ner:           vText("f_ner"),
+      ner:           anon ? "Нууцлагдсан" : vText("f_ner"),
+      anonymous:     !!anon,
       huiis:         getRadio("gender") || "Хоосон",
       medegedech:    getRadio("reporter"),
       torlud:        getChecks("type"),
@@ -958,10 +998,17 @@
       createdAt:     firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    db.collection("reports").doc(clientCode).set(payload)
+    var batch = db.batch();
+    batch.set(db.collection("reports").doc(clientCode), payload);
+    batch.set(db.collection("publicStatus").doc(clientCode), {
+      code: clientCode,
+      status: "Хянагдаж байна",
+      date: nowIso
+    });
+    batch.commit()
       .then(function() {
         sendNotificationEmail(payload, clientCode);
-        window.location.href = "success.html?code=" + clientCode;
+        window.location.href = "success.html?code=" + encodeURIComponent(clientCode);
       })
       .catch(function(err) {
         alert("Алдаа гарлаа: " + err.message);
