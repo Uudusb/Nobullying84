@@ -816,11 +816,16 @@
     msg += "Нэмэлт тайлбар  :\r\n" + (payload.nemeltel || "-") + "\r\n";
     msg += "================================\r\n";
 
+    // Ахлах → azaa.m0623@gmail.com, Дунд → EMAIL_DUND
+    var toEmail = payload.schoolLevel === "Ахлах анги" ? EMAIL_AKHLAKH : EMAIL_DUND;
+
     fetch(NOTIFY_URL, {
       method: "POST",
       body: JSON.stringify({
         code:    code,
         level:   payload.schoolLevel,
+        to:      toEmail,
+        email:   toEmail,
         message: msg,
         subject: "[Дээрэлхэлт] Шинэ мэдэгдэл #" + code + " — " + payload.schoolLevel
       }),
