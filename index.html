@@ -819,7 +819,8 @@
     // Ахлах → azaa.m0623@gmail.com, Дунд → EMAIL_DUND
     var toEmail = payload.schoolLevel === "Ахлах анги" ? EMAIL_AKHLAKH : EMAIL_DUND;
 
-    fetch(NOTIFY_URL, {
+    // keepalive: хуудас шилжихэд хүсэлт цуцлагдахгүй
+    return fetch(NOTIFY_URL, {
       method: "POST",
       body: JSON.stringify({
         code:    code,
@@ -829,8 +830,11 @@
         message: msg,
         subject: "[Дээрэлхэлт] Шинэ мэдэгдэл #" + code + " — " + payload.schoolLevel
       }),
-      headers: { "Content-Type": "text/plain;charset=utf-8" }
-    }).catch(function(err) { console.warn("Email error:", err); });
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      keepalive: true
+    }).catch(function(err) {
+      console.warn("Email error:", err);
+    });
   }
 
 
@@ -1012,8 +1016,13 @@
     });
     batch.commit()
       .then(function() {
-        sendNotificationEmail(payload, clientCode);
-        window.location.href = "success.html?code=" + encodeURIComponent(clientCode);
+        // Имэйл дуусахыг хүлээнэ — өмнө нь шууд шилжсэнээр fetch цуцлагдаж имэйл очдоггүй байсан
+        var goSuccess = function() {
+          window.location.href = "success.html?code=" + encodeURIComponent(clientCode);
+        };
+        var emailPromise = sendNotificationEmail(payload, clientCode);
+        var timeout = new Promise(function(resolve) { setTimeout(resolve, 10000); });
+        return Promise.race([emailPromise, timeout]).then(goSuccess, goSuccess);
       })
       .catch(function(err) {
         alert("Алдаа гарлаа: " + err.message);
