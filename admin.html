@@ -277,7 +277,7 @@ td{padding:12px 14px;vertical-align:middle}
       <button class="m-close" onclick="closeForgotModal()">✕</button>
     </div>
     <div class="pw-body">
-      <p style="font-size:13px;color:#718096;margin-bottom:16px;line-height:1.6">И-мэйл хаягаа оруулна уу. Firebase таны бүртгэлтэй и-мэйл рүү нууц үг сэргээх холбоос илгээнэ.</p>
+      <p style="font-size:13px;color:#718096;margin-bottom:16px;line-height:1.6">И-мэйл хаягаа оруулна уу. Бүртгэлтэй и-мэйл рүү нууц үг сэргээх холбоос илгээнэ.</p>
       <div class="pw-err" id="forgotErr"></div>
       <div class="pw-ok" id="forgotOk"></div>
       <div class="pw-field">
@@ -356,7 +356,7 @@ if (!firebase.apps || !firebase.apps.length) { firebase.initializeApp(firebaseCo
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// Role map only (NO passwords). Real auth = Firebase Authentication.
+// Role map only (NO passwords).
 var ADMIN_ROLES = {
   "uudusbayarsaikhan@gmail.com": { level: "all", role: "Ерөнхий админ" },
   "azaa.m0623@gmail.com": { level: "Ахлах анги", role: "Ахлах ангийн нийгмийн ажилтан" },
