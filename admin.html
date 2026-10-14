@@ -172,7 +172,9 @@ td{padding:12px 14px;vertical-align:middle}
       <input type="password" id="loginPass" class="login-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="login-err" id="loginErr"></div>
+    <div id="authSetupHint" style="display:none;background:#FEF6E4;border:1.5px solid #F7C873;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12px;font-weight:700;color:#92400E;text-align:left;line-height:1.55"></div>
     <button class="login-btn" onclick="doLogin()">🚀 Нэвтрэх</button>
+    <button onclick="doFirstTimeSetup()" style="width:100%;background:#fff;border:2px solid #C5E1F5;color:#5BA4CF;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;border-radius:12px;padding:11px;cursor:pointer;margin-top:8px">🆕 Анх удаа — нууц үг тохируулах</button>
     <button onclick="openForgotModal()" style="width:100%;background:none;border:none;color:#5BA4CF;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;padding:8px;margin-top:4px">🔑 Нууц үг мартсан уу?</button>
     <p class="login-note">Зөвхөн <strong>зөвшөөрөгдсөн</strong> нийгмийн ажилтан нэвтэрч чадна.</p>
     <div style="display:flex;gap:10px;margin-top:18px;">
@@ -389,6 +391,56 @@ auth.onAuthStateChanged(function(user) {
   enterDashboard();
 });
 
+var AUTH_CONSOLE_URL = "https://console.firebase.google.com/project/school-bullying-report/authentication/providers";
+
+function authErrorMessage(err) {
+  var code = (err && err.code) || "";
+  var raw = (err && err.message) || "";
+  if (code === "auth/configuration-not-found" || /CONFIGURATION_NOT_FOUND/i.test(raw)) {
+    return "❌ Firebase Authentication асаагдаагүй байна. Эзэмшигч Console дээр Email/Password-ийг асааж, хэрэглэгч үүсгэнэ үү.";
+  }
+  if (code === "auth/operation-not-allowed") {
+    return "❌ Email/Password нэвтрэлт унтарсан байна. Firebase Console → Authentication → Sign-in method → Email/Password → Enable.";
+  }
+  if (code === "auth/user-not-found" || code === "auth/invalid-email") {
+    return "❌ Энэ и-мэйл Firebase Auth дээр бүртгэгдээгүй. Доорх «Анх удаа — нууц үг тохируулах» товчийг дарна уу.";
+  }
+  if (code === "auth/wrong-password" || code === "auth/invalid-credential" || code === "auth/invalid-login-credentials") {
+    return "❌ Нууц үг буруу байна. «Нууц үг мартсан уу?» эсвэл «Анх удаа — нууц үг тохируулах»-ыг оролдоно уу.";
+  }
+  if (code === "auth/too-many-requests") {
+    return "❌ Хэт олон оролдлого. Түр хүлээнэ үү.";
+  }
+  if (code === "auth/email-already-in-use") {
+    return "❌ Энэ и-мэйл аль хэдийн бүртгэлтэй. Дээрх нууц үгээр нэвтэрнэ үү. эсвэл «Нууц үг мартсан уу?».";
+  }
+  if (code === "auth/weak-password") {
+    return "❌ Нууц үг дор хаяж 6 тэмдэгт байх ёстой.";
+  }
+  return "❌ Нэвтрэхэд алдаа гарлаа: " + (code || raw || "unknown");
+}
+
+function showAuthSetupHint(text) {
+  var el = document.getElementById("authSetupHint");
+  if (!el) return;
+  el.style.display = "block";
+  el.innerHTML = text + '<br><a href="' + AUTH_CONSOLE_URL + '" target="_blank" rel="noopener" style="color:#92400E;font-weight:900">Firebase Console нээх →</a>';
+}
+
+function probeAuthConfig() {
+  // Хэрэв Auth асаагаагүй бол нэвтрэхээс өмнө анхааруулга гаргана
+  auth.fetchSignInMethodsForEmail("azaa.m0623@gmail.com")
+    .then(function() { /* Auth ажиллаж байна */ })
+    .catch(function(err) {
+      var code = (err && err.code) || "";
+      var raw = (err && err.message) || "";
+      if (code === "auth/configuration-not-found" || /CONFIGURATION_NOT_FOUND/i.test(raw) || code === "auth/operation-not-allowed") {
+        showAuthSetupHint("⚠️ Firebase Authentication (Email/Password) энэ төсөл дээр асаагдаагүй тул хэн ч нэвтэрч чадахгүй. Эзэмшигч доорх холбоосоор орж <strong>Email/Password → Enable</strong> хийгээд 3 админ и-мэйлийг Users-д нэмнэ үү.");
+      }
+    });
+}
+probeAuthConfig();
+
 function doLogin() {
   var email = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
   var pass = document.getElementById("loginPass").value || "";
@@ -402,16 +454,46 @@ function doLogin() {
 
   auth.signInWithEmailAndPassword(email, pass)
     .catch(function(err) {
-      var msg = "❌ И-мэйл эсвэл нууц үг буруу байна.";
-      if (err && err.code === "auth/user-not-found") {
-        msg = "❌ Firebase Auth дээр энэ хэрэглэгч бүртгэгдээгүй байна. Console-оос үүсгэнэ үү.";
-      } else if (err && err.code === "auth/too-many-requests") {
-        msg = "❌ Хэт олон оролдлого. Түр хүлээнэ үү.";
-      } else if (err && err.code === "auth/operation-not-allowed") {
-        msg = "❌ Firebase Console → Authentication → Email/Password-ийг асаана уу.";
+      showErr(authErrorMessage(err));
+      if (err && (err.code === "auth/configuration-not-found" || /CONFIGURATION_NOT_FOUND/i.test(err.message || ""))) {
+        showAuthSetupHint("⚠️ Эхлээд Firebase Authentication-ийг асаах хэрэгтэй.");
       }
-      showErr(msg);
       document.getElementById("loginPass").value = "";
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.textContent = "🚀 Нэвтрэх";
+    });
+}
+
+/** Зөвшөөрөгдсөн и-мэйлээр анхны Firebase Auth бүртгэл үүсгэнэ (Auth ассан үед). */
+function doFirstTimeSetup() {
+  var email = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
+  var pass = document.getElementById("loginPass").value || "";
+  document.getElementById("loginErr").style.display = "none";
+  if (!email || !pass) { showErr("И-мэйл болон шинэ нууц үгээ (дор хаяж 6 тэмдэгт) оруулна уу."); return; }
+  if (!ADMIN_ROLES[email]) { showErr("❌ Энэ и-мэйл хаяг бүртгэлгүй байна."); return; }
+  if (pass.length < 6) { showErr("❌ Нууц үг дор хаяж 6 тэмдэгт байх ёстой."); return; }
+
+  var btn = document.querySelector(".login-btn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Бүртгэж байна...";
+
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(function() {
+      // onAuthStateChanged dashboard руу оруулна
+    })
+    .catch(function(err) {
+      // Хэрэв аль хэдийн байвал нэвтрэхийг оролдоно
+      if (err && err.code === "auth/email-already-in-use") {
+        return auth.signInWithEmailAndPassword(email, pass).catch(function(err2) {
+          showErr(authErrorMessage(err2));
+        });
+      }
+      showErr(authErrorMessage(err));
+      if (err && (err.code === "auth/configuration-not-found" || /CONFIGURATION_NOT_FOUND/i.test(err.message || "") || err.code === "auth/operation-not-allowed")) {
+        showAuthSetupHint("⚠️ Эхлээд Firebase Console дээр Email/Password-ийг Enable хийнэ үү. Дараа нь энэ товчоор нууц үг тохируулна.");
+      }
     })
     .finally(function() {
       btn.disabled = false;
