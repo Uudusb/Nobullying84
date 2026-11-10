@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="mn" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Самбар</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" id="side">
+      <a class="brand" href="#/dashboard">
+        <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path fill="#2C9EFF" d="M8 10h36a10 10 0 0 1 10 10v16a10 10 0 0 1-10 10H30l-12 12v-12H8A10 10 0 0 1-2 36V20A10 10 0 0 1 8 10z"/><circle cx="22" cy="28" r="4" fill="#fff"/><circle cx="38" cy="28" r="4" fill="#fff"/></svg>
+        Oron
+      </a>
+      <a href="#/dashboard" data-route="dashboard">Самбар</a>
+      <a href="#/monitoring" data-route="monitoring">Хяналт</a>
+      <a href="#/keywords" data-route="keywords">Түлхүүр үг</a>
+      <a href="#/trends" data-route="trends">Тренд</a>
+      <a href="#/sentiment" data-route="sentiment">Сэтгэгдэл</a>
+      <a href="#/competitors" data-route="competitors">Өрсөлдөгч</a>
+      <a href="#/reports" data-route="reports">Тайлан</a>
+      <a href="#/alerts" data-route="alerts">Мэдэгдэл</a>
+      <a href="#/team" data-route="team">Баг</a>
+    </aside>
+    <div class="content">
+      <header class="topbar">
+        <button class="btn ghost menu-btn" id="menu" type="button">Цэс</button>
+        <strong id="orgName">…</strong>
+        <span class="badge sample" id="role">…</span>
+        <span class="spacer"></span>
+        <select id="orgSwitch" hidden></select>
+        <button class="btn ghost" id="lang" type="button">EN</button>
+        <a class="btn ghost" href="#/alerts" id="bell">0</a>
+        <button class="btn ghost" id="logout" type="button">Гарах</button>
+      </header>
+      <main class="view" id="view"></main>
+    </div>
+  </div>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

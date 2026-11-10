@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Нэвтрэх</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="auth">
+    <section class="visual">
+      <div class="planet"></div>
+      <div class="copy">
+        <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path fill="#2C9EFF" d="M8 10h36a10 10 0 0 1 10 10v16a10 10 0 0 1-10 10H30l-12 12v-12H8A10 10 0 0 1-2 36V20A10 10 0 0 1 8 10z"/><circle cx="22" cy="28" r="4" fill="#fff"/><circle cx="38" cy="28" r="4" fill="#fff"/></svg>
+        <h1>Social Intelligence</h1>
+        <p>Байгууллагын хяналт, түлхүүр үг, сэтгэгдэл, тайлан. Жишээ өгөгдөл нь жишээ гэж тэмдэглэгдсэн.</p>
+      </div>
+    </section>
+    <section class="form-side">
+      <a class="top-link" href="/">← Нүүр</a>
+      <form class="card" id="form">
+        <h2>НЭВТРЭХ</h2>
+        <div class="err" id="err"></div>
+        <label class="field"><span>И-мэйл</span><input name="email" type="email" autocomplete="username" required></label>
+        <label class="field"><span>Нууц үг</span><input name="password" type="password" autocomplete="current-password" required></label>
+        <button class="btn primary" type="submit">Нэвтрэх</button>
+        <p><a href="/forgot">Нууц үгээ мартсан уу?</a> · <a href="/register">Бүртгүүлэх</a></p>
+        <div class="samples">
+          <strong>Жишээ бүртгэл / sample accounts</strong>
+          <p><code>owner.alpha@sample.local</code> / <code>SampleOwner!84</code> — эзэн</p>
+          <p><code>analyst.alpha@sample.local</code> / <code>SampleAnalyst!84</code> — шинжээч</p>
+          <p><code>viewer.alpha@sample.local</code> / <code>SampleViewer!84</code> — үзэгч</p>
+          <p><code>owner.beta@sample.local</code> / <code>SampleOther!84</code> — өөр байгууллага</p>
+        </div>
+      </form>
+    </section>
+  </div>
+  <script>
+    document.getElementById("form").onsubmit = async (event) => {
+      event.preventDefault();
+      const err = document.getElementById("err");
+      err.style.display = "none";
+      const body = Object.fromEntries(new FormData(event.target));
+      const res = await fetch("/api/auth/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const json = await res.json();
+      if (!res.ok) { err.textContent = json.error; err.style.display = "block"; return; }
+      location.href = "/app";
+    };
+  </script>
+</body>
+</html>

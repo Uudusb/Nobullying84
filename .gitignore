@@ -1,0 +1,3 @@
+server/data/*.db
+server/data/*.db-*
+server/data/*.db-journal
