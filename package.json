@@ -1,0 +1,9 @@
+{
+  "name": "social-intelligence-platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "test": "node --disable-warning=ExperimentalWarning --test tests/platform.test.js"
+  }
+}

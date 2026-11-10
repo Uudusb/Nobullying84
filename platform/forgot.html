@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Нууц үг</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="auth">
+    <section class="visual"><div class="planet"></div><div class="copy"><h1>Нууц үг сэргээх</h1><p>И-мэйл илгээгч тохируулаагүй. Хүчинтэй бүртгэл дээр локал токен гарна.</p></div></section>
+    <section class="form-side">
+      <a class="top-link" href="/login">Буцах</a>
+      <form class="card" id="ask">
+        <h2>И-МЭЙЛ</h2>
+        <div class="err" id="err"></div>
+        <label class="field"><span>И-мэйл</span><input name="email" type="email" required></label>
+        <button class="btn primary" type="submit">Токен авах</button>
+        <p id="out" class="samples" hidden></p>
+      </form>
+      <form class="card" id="reset">
+        <h2>ШИНЭ НУУЦ ҮГ</h2>
+        <label class="field"><span>Токен</span><input name="token" required></label>
+        <label class="field"><span>Шинэ нууц үг</span><input name="password" type="password" minlength="8" required></label>
+        <button class="btn primary" type="submit">Солих</button>
+        <p id="done" class="muted"></p>
+      </form>
+    </section>
+  </div>
+  <script>
+    document.getElementById("ask").onsubmit = async (event) => {
+      event.preventDefault();
+      const body = Object.fromEntries(new FormData(event.target));
+      const res = await fetch("/api/auth/forgot", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const json = await res.json();
+      const out = document.getElementById("out");
+      out.hidden = false;
+      out.textContent = json.demoResetToken ? `${json.message} Токен: ${json.demoResetToken}` : json.message;
+      if (json.demoResetToken) document.querySelector("#reset [name=token]").value = json.demoResetToken;
+    };
+    document.getElementById("reset").onsubmit = async (event) => {
+      event.preventDefault();
+      const body = Object.fromEntries(new FormData(event.target));
+      const res = await fetch("/api/auth/reset", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const json = await res.json();
+      document.getElementById("done").textContent = res.ok ? "Солигдлоо. Нэвтэрнэ үү." : json.error;
+      if (res.ok) setTimeout(() => { location.href = "/login"; }, 600);
+    };
+  </script>
+</body>
+</html>

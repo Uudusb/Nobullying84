@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="mn" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Social Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/marketing.css">
+</head>
+<body>
+  <header class="nav" id="nav">
+    <a class="brand" href="/">
+      <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path fill="#2C9EFF" d="M8 10h36a10 10 0 0 1 10 10v16a10 10 0 0 1-10 10H30l-12 12v-12H8A10 10 0 0 1-2 36V20A10 10 0 0 1 8 10z"/><circle cx="22" cy="28" r="4" fill="#fff"/><circle cx="38" cy="28" r="4" fill="#fff"/></svg>
+      <span>Oron</span>
+    </a>
+    <button class="menu-btn" id="menu" type="button" aria-label="Menu">☰</button>
+    <nav class="nav-links">
+      <a href="#trends" data-i="navTrends">Тренд</a>
+      <a href="#sources" data-i="navSources">Эх сурвалж</a>
+      <a href="#faq" data-i="navFaq">Асуулт</a>
+      <a href="#contact" data-i="navContact">Холбоо</a>
+      <a class="signin" href="/login" data-i="signIn">Нэвтрэх</a>
+      <span class="lang">
+        <button type="button" data-lang="mn">MN</button>
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" id="theme" aria-label="Theme">☾</button>
+      </span>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <h1 id="heroTitle">Сошиал мэдээллээ нэг самбараас</h1>
+      <p id="heroText">Байгууллагынхаа дурсамж, гомдол, сэтгэл ханамжийг Монгол, Англи хэл дээр нь ажиглаарай. Энэ хуудас олон нийтийн загварт тулгуурласан бие даасан демо бөгөөд sumbee.mn-тэй холбоогүй.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#contact" data-i="contact">Холбоо барих</a>
+        <a class="btn dark" href="#trends" data-i="trends">Тренд сэдэв</a>
+      </div>
+      <div class="stage" aria-hidden="true">
+        <div class="panel"><strong>Сэтгэл</strong><div style="font-size:28px;font-weight:800;color:#2C9EFF">43%</div><span class="muted">жишээ заалт</span></div>
+        <div class="panel"><strong>Дурсамж</strong><div class="bars"><span style="height:40%"></span><span style="height:70%"></span><span style="height:55%"></span><span style="height:90%"></span><span style="height:60%"></span></div></div>
+        <div class="panel"><strong>Платформ</strong><div class="bars"><span style="height:80%"></span><span style="height:50%"></span><span style="height:35%"></span></div></div>
+      </div>
+    </section>
+    <section class="section" id="trends">
+      <h2 data-i="trendTitle">Тренд сэдэв</h2>
+      <div class="cards" id="topics"></div>
+    </section>
+    <section class="section" id="sources">
+      <h2 data-i="sourceTitle">Эх сурвалж</h2>
+      <p class="note" style="text-align:center">Албан API холбогдоогүй. Доорх тоо нь энэ демогийн жишээ өгөгдөл.</p>
+      <div class="data-grid" id="sourcesGrid"></div>
+    </section>
+    <section class="section faq" id="faq">
+      <h2 data-i="faqTitle">Нийтлэг асуулт</h2>
+      <details open><summary>Энэ самбар юу хийдэг вэ?</summary><p>Пост, сэтгэгдэл, түлхүүр үг, өрсөлдөгч, тайланг нэг байгууллага дотор харуулна. Гаднаас татсан мөр бүрт жишээ гэсэн тэмдэг байна.</p></details>
+      <details><summary>Ямар хэлээр сэтгэгдэл уншдаг вэ?</summary><p>Локал толь бичиг Монгол (кирилл) ба Англи текстийг онооно. Гадаад загвар дууддаггүй.</p></details>
+      <details><summary>Албан сошиал холболт байна уу?</summary><p>Байхгүй. Facebook, X, Instagram, Threads, YouTube, вэб холбогч бэлэн интерфэйстэй, эрх байхгүй тул жишээ холбогч ажиллана.</p></details>
+    </section>
+    <section class="section" id="contact">
+      <div class="contact">
+        <div>
+          <h2 data-i="contactTitle">Холбоо барих</h2>
+          <p class="muted">И-мэйл илгээгч тохируулаагүй. Форм хадгалахгүй.</p>
+          <p>Улаанбаатар</p>
+        </div>
+        <form id="contactForm">
+          <label>Нэр<input name="name" required></label>
+          <label>И-мэйл<input name="email" type="email" required></label>
+          <label>Мессеж<textarea name="message" required></textarea></label>
+          <button class="btn primary" type="submit">Илгээх</button>
+          <p id="contactOut" class="muted"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+  <footer>Бие даасан демо. sumbee.mn болон сургуулийн мэдэгдлийн системтэй холбоогүй.</footer>
+  <div class="modal" id="gate" hidden>
+    <div class="box">
+      <h3>Нэвтрэх хэрэгтэй</h3>
+      <p class="muted">Бүрэн самбар, жишээ өгөгдөл, тайлан зөвхөн бүртгэлтэй хэрэглэгчид нээлттэй.</p>
+      <p><a class="btn primary" href="/login">Нэвтрэх</a> <a class="btn dark" href="/register">Бүртгүүлэх</a></p>
+      <button class="btn ghost" type="button" id="closeGate">Хаах</button>
+    </div>
+  </div>
+  <div class="chat">
+    <div class="chat-panel" id="chat" hidden>
+      <strong>Локал туслах</strong>
+      <p class="muted">Гадаад загвар биш. Богино асуулт асууна.</p>
+      <div id="chatLog" class="muted"></div>
+      <form id="chatForm"><input name="q" placeholder="Жишээ: мониторинг гэж юу вэ?"><button class="btn primary" type="submit">Илгээх</button></form>
+    </div>
+    <button class="launcher" id="openChat" type="button" aria-label="Help">?</button>
+  </div>
+  <script type="module" src="/js/marketing.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Бүртгүүлэх</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="auth">
+    <section class="visual"><div class="planet"></div><div class="copy"><h1>Шинэ байгууллага</h1><p>Бүртгэл таныг тухайн байгууллагын эзэн болгоно. Өөр байгууллагын мөр харагдахгүй.</p></div></section>
+    <section class="form-side">
+      <a class="top-link" href="/login">Нэвтрэх</a>
+      <form class="card" id="form">
+        <h2>БҮРТГҮҮЛЭХ</h2>
+        <div class="err" id="err"></div>
+        <label class="field"><span>Нэр</span><input name="name" required></label>
+        <label class="field"><span>Байгууллага</span><input name="organizationName" required></label>
+        <label class="field"><span>И-мэйл</span><input name="email" type="email" required></label>
+        <label class="field"><span>Нууц үг</span><input name="password" type="password" minlength="8" required></label>
+        <button class="btn primary" type="submit">Бүртгүүлэх</button>
+      </form>
+    </section>
+  </div>
+  <script>
+    document.getElementById("form").onsubmit = async (event) => {
+      event.preventDefault();
+      const err = document.getElementById("err");
+      err.style.display = "none";
+      const body = Object.fromEntries(new FormData(event.target));
+      const res = await fetch("/api/auth/register", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const json = await res.json();
+      if (!res.ok) { err.textContent = json.error; err.style.display = "block"; return; }
+      location.href = "/app";
+    };
+  </script>
+</body>
+</html>
